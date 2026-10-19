@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Invoice Studio - Praveenkumar | Video Editor & Web Developer</title>
-  
-  <!-- Tailwind CSS -->
+
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts: Inter, Plus Jakarta Sans, Playfair Display, Space Grotesk, JetBrains Mono -->
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, Playfair Display, Cinzel, JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <!-- QRCode.js Library -->
+
+  <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <script>
@@ -28,8 +28,17 @@
             sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
             serif: ['Playfair Display', 'serif'],
-            cinzel: ['Cinzel', 'serif'],
-            space: ['Space Grotesk', 'sans-serif']
+            cinzel: ['Cinzel', 'serif']
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81'
+            }
           }
         }
       }
@@ -44,7 +53,7 @@
       --accent-ring: rgba(79, 70, 229, 0.25);
     }
 
-    /* Standard A4 Paper Specs */
+    /* Fixed A4 dimensions in millimeter standard */
     .a4-sheet {
       width: 210mm;
       min-height: 297mm;
@@ -58,9 +67,11 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      transform-origin: top center;
     }
 
-    /* Subtle editable inputs for on-canvas direct typing */
+    /* Editable subtle inputs on paper canvas */
     .field-input {
       background: transparent;
       border: 1px solid transparent;
@@ -70,8 +81,8 @@
       width: 100%;
     }
     .field-input:hover {
-      background: rgba(0, 0, 0, 0.03);
-      border-color: rgba(0, 0, 0, 0.1);
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.15);
     }
     .field-input:focus {
       background: #ffffff;
@@ -80,7 +91,7 @@
       box-shadow: 0 0 0 2px var(--accent-ring);
     }
 
-    /* Split sidebar input styling */
+    /* Dark sidebar inputs in Split template */
     .dark-field-input {
       background: transparent;
       border: 1px solid transparent;
@@ -90,16 +101,25 @@
       width: 100%;
     }
     .dark-field-input:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
     }
     .dark-field-input:focus {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.2);
       border-color: #ffffff;
       outline: none;
     }
 
-    /* Print Configuration */
+    /* Hide scrollbars for slick mobile tabs */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Print Configuration strictly honoring 1-page A4 */
     @media print {
       @page {
         size: A4 portrait;
@@ -111,18 +131,39 @@
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
+        overflow: visible !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .no-print {
+      .no-print,
+      #mobileNav,
+      #mobileDock,
+      #sidebarDrawer,
+      #templateModal,
+      #themeModal,
+      #mobileViewSwitch {
         display: none !important;
       }
-      .canvas-viewport {
+      #mainContentArea {
         padding: 0 !important;
         margin: 0 !important;
         background: #ffffff !important;
         overflow: visible !important;
         display: block !important;
+        height: auto !important;
+      }
+      #previewViewport {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        width: 210mm !important;
+        height: 297mm !important;
+      }
+      #canvasScaler {
+        transform: scale(1) !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       .a4-sheet {
         box-shadow: none !important;
@@ -133,7 +174,6 @@
         max-height: 297mm !important;
         page-break-after: avoid !important;
         page-break-inside: avoid !important;
-        transform: scale(1) !important;
       }
       .field-input, .dark-field-input {
         border: none !important;
@@ -141,228 +181,353 @@
         padding: 0 !important;
         box-shadow: none !important;
       }
-      .row-drag-handle, .row-delete-btn, .add-row-container {
+      .no-print-element {
         display: none !important;
       }
     }
-
-    /* Custom Scrollbars */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-800 antialiased h-screen flex flex-col font-sans overflow-hidden">
+<body class="bg-slate-950 text-slate-100 antialiased h-screen flex flex-col font-sans overflow-hidden select-none sm:select-auto">
 
-  <!-- TOP HEADER / CONTROL STRIP -->
-  <header class="no-print bg-slate-900 border-b border-slate-800 z-40 px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-lg text-white">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-900/50">
-        <i data-lucide="video" class="w-5 h-5"></i>
+  <!-- ========================================================
+       TOP NAVIGATION BAR (RESPONSIVE)
+  ======================================================== -->
+  <header class="no-print bg-slate-900 border-b border-slate-800 z-30 px-3 sm:px-6 py-2.5 flex items-center justify-between flex-shrink-0 shadow-lg">
+    <!-- Brand / Creator Title -->
+    <div class="flex items-center gap-2.5 sm:gap-3">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-900/40 flex-shrink-0">
+        <i data-lucide="video" class="w-4 h-4 sm:w-5 sm:h-5"></i>
       </div>
       <div>
-        <h1 class="font-bold text-sm sm:text-base tracking-tight leading-tight flex items-center gap-2">
-          Praveenkumar <span class="text-xs font-normal text-slate-400 border-l border-slate-700 pl-2">Invoice Studio</span>
-        </h1>
-        <p class="text-[11px] text-indigo-400 font-medium">Video Editor & Web Developer • UPI Integrated</p>
+        <div class="flex items-center gap-2">
+          <h1 class="font-extrabold text-sm sm:text-base tracking-tight leading-tight text-white">
+            Praveenkumar
+          </h1>
+          <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            PRO STUDIO
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-medium truncate max-w-[190px] sm:max-w-none">
+          Video Editor & Web Developer
+        </p>
       </div>
     </div>
 
-    <!-- Quick Action Toolset -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <!-- Zoom controls for viewing A4 comfortably -->
-      <div class="hidden md:flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700 text-xs text-slate-300">
-        <button onclick="adjustZoom(-0.05)" class="px-2 py-1 hover:text-white" title="Zoom Out"><i data-lucide="zoom-out" class="w-3.5 h-3.5"></i></button>
-        <span id="zoomLevelText" class="px-1 text-[11px] font-mono font-bold w-12 text-center">85%</span>
-        <button onclick="adjustZoom(0.05)" class="px-2 py-1 hover:text-white" title="Zoom In"><i data-lucide="zoom-in" class="w-3.5 h-3.5"></i></button>
-        <button onclick="resetZoom()" class="px-1.5 py-1 text-[10px] text-slate-400 hover:text-white border-l border-slate-700">Fit</button>
+    <!-- Center View Switcher on Mobile/Tablet (< 1024px) -->
+    <div id="mobileViewSwitch" class="lg:hidden flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
+      <button onclick="setMobileView('edit')" id="mobileTabEdit" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm">
+        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+        <span>Form</span>
+      </button>
+      <button onclick="setMobileView('preview')" id="mobileTabPreview" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
+        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+        <span>A4 Paper</span>
+      </button>
+    </div>
+
+    <!-- Right Quick Actions -->
+    <div class="flex items-center gap-2">
+      <!-- Desktop Zoom Controller -->
+      <div class="hidden xl:flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700 text-xs text-slate-300 mr-1">
+        <button onclick="adjustDesktopZoom(-0.05)" class="px-2 py-1 hover:text-white" title="Zoom Out"><i data-lucide="zoom-out" class="w-3.5 h-3.5"></i></button>
+        <span id="desktopZoomText" class="px-1 text-[11px] font-mono font-bold w-12 text-center">85%</span>
+        <button onclick="adjustDesktopZoom(0.05)" class="px-2 py-1 hover:text-white" title="Zoom In"><i data-lucide="zoom-in" class="w-3.5 h-3.5"></i></button>
+        <button onclick="fitToScreen()" class="px-1.5 py-1 text-[10px] text-indigo-400 hover:text-indigo-300 border-l border-slate-700 font-bold">Fit</button>
       </div>
 
-      <button onclick="resetDefaults()" title="Reset to Praveenkumar's defaults" class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1.5">
+      <!-- Quick Reset Button -->
+      <button onclick="resetDefaults()" title="Reset to defaults" class="hidden sm:flex px-2.5 py-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-lg transition-colors items-center gap-1">
         <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-        <span class="hidden sm:inline">Reset</span>
+        <span class="hidden md:inline">Reset</span>
       </button>
 
-      <button onclick="saveToLocalStorage()" class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1.5">
-        <i data-lucide="save" class="w-3.5 h-3.5"></i>
-        <span class="hidden sm:inline">Save</span>
+      <!-- Theme Button -->
+      <button onclick="openThemeModal()" title="Theme Colors" class="p-2 sm:px-2.5 sm:py-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1.5">
+        <span class="w-3.5 h-3.5 rounded-full inline-block" id="activeThemeDot" style="background-color: var(--accent);"></span>
+        <span class="hidden md:inline text-[11px] font-medium">Color</span>
       </button>
 
-      <button onclick="triggerPrintPDF()" class="px-4 py-1.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-95 rounded-lg shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2">
-        <i data-lucide="printer" class="w-4 h-4"></i>
-        <span>Download A4 PDF</span>
+      <!-- Download / Print PDF Button -->
+      <button onclick="triggerPrintPDF()" class="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-95 rounded-lg sm:rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-1.5 sm:gap-2">
+        <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i>
+        <span>PDF <span class="hidden sm:inline">Export</span></span>
       </button>
     </div>
   </header>
 
-  <!-- TEMPLATE SWITCHER BAR -->
-  <div class="no-print bg-slate-850 bg-slate-950/80 border-b border-slate-800/80 px-4 sm:px-6 py-2 flex items-center justify-between gap-4 overflow-x-auto text-xs">
-    <div class="flex items-center gap-2 text-slate-400 flex-shrink-0">
-      <i data-lucide="layout-template" class="w-4 h-4 text-indigo-400"></i>
-      <span class="font-semibold text-slate-200">5 A4 Templates:</span>
+  <!-- ========================================================
+       DESKTOP SECONDARY SUB-HEADER (TEMPLATE TABS)
+  ======================================================== -->
+  <div class="no-print hidden lg:flex bg-slate-900/90 border-b border-slate-800/80 px-6 py-2 items-center justify-between gap-4 text-xs flex-shrink-0">
+    <div class="flex items-center gap-2">
+      <span class="text-slate-400 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+        <i data-lucide="layout-template" class="w-3.5 h-3.5 text-indigo-400"></i> A4 Template:
+      </span>
+      <div class="flex items-center gap-1.5">
+        <button onclick="switchTemplate('modern')" id="dtBtn-modern" class="dt-tpl-btn px-2.5 py-1 rounded-md font-semibold transition-all bg-indigo-600 text-white shadow">Modern Tech</button>
+        <button onclick="switchTemplate('minimal')" id="dtBtn-minimal" class="dt-tpl-btn px-2.5 py-1 rounded-md font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">Minimal Clean</button>
+        <button onclick="switchTemplate('creative')" id="dtBtn-creative" class="dt-tpl-btn px-2.5 py-1 rounded-md font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">Creative Studio</button>
+        <button onclick="switchTemplate('corporate')" id="dtBtn-corporate" class="dt-tpl-btn px-2.5 py-1 rounded-md font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">Corporate Exec</button>
+        <button onclick="switchTemplate('sidebar')" id="dtBtn-sidebar" class="dt-tpl-btn px-2.5 py-1 rounded-md font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white">Split Sidebar</button>
+      </div>
     </div>
 
-    <!-- 5 Live Template Switchers -->
-    <div class="flex items-center gap-1.5 overflow-x-auto py-0.5">
-      <button onclick="switchTemplate('modern')" id="tplBtn-modern" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm">
-        <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Modern Tech
-      </button>
-      <button onclick="switchTemplate('minimal')" id="tplBtn-minimal" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
-        <i data-lucide="align-left" class="w-3.5 h-3.5"></i> Minimal Clean
-      </button>
-      <button onclick="switchTemplate('creative')" id="tplBtn-creative" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
-        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Creative Studio
-      </button>
-      <button onclick="switchTemplate('corporate')" id="tplBtn-corporate" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
-        <i data-lucide="landmark" class="w-3.5 h-3.5"></i> Corporate Exec
-      </button>
-      <button onclick="switchTemplate('sidebar')" id="tplBtn-sidebar" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
-        <i data-lucide="columns-2" class="w-3.5 h-3.5"></i> Split Sidebar
-      </button>
-    </div>
-
-    <!-- Theme Color Palette -->
-    <div class="flex items-center gap-1.5 flex-shrink-0 pl-3 border-l border-slate-800">
-      <span class="text-[11px] text-slate-400 mr-1 hidden lg:inline">Accent:</span>
-      <div id="themePalette" class="flex items-center gap-1.5"></div>
+    <!-- Live UPI Banner in Header -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60 text-[11px]">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-slate-400">UPI:</span>
+        <span class="font-mono font-bold text-emerald-300 select-all cursor-pointer" onclick="copyUpiId()">8667536739-2@ybl</span>
+        <button onclick="copyUpiId()" class="text-slate-400 hover:text-white ml-1" title="Copy UPI"><i data-lucide="copy" class="w-3 h-3"></i></button>
+      </div>
     </div>
   </div>
 
-  <!-- WORKSPACE BODY: SIDEBAR + VIEWPORT -->
-  <div class="flex-1 flex overflow-hidden">
-    
-    <!-- LEFT SIDEBAR: DETAILED FINANCIAL & METADATA CONTROLS -->
-    <aside class="no-print w-80 lg:w-88 bg-slate-900 border-r border-slate-800 overflow-y-auto text-slate-300 p-4 space-y-5 flex-shrink-0 text-xs">
+  <!-- ========================================================
+       MAIN APP WORKSPACE
+  ======================================================== -->
+  <div id="mainContentArea" class="flex-1 flex overflow-hidden relative">
+
+    <!-- ======================================================
+         LEFT: SIDEBAR / FORM (VISIBLE ALWAYS ON DESKTOP,
+         TOGGLED AS "EDIT MODE" ON MOBILE/TABLET)
+    ====================================================== -->
+    <aside id="sidebarDrawer" class="w-full lg:w-96 xl:w-[410px] bg-slate-900 border-r border-slate-800 flex flex-col flex-shrink-0 h-full overflow-hidden transition-all duration-200 z-10">
       
-      <!-- Currency & Status -->
-      <div class="bg-slate-850 bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60">
-          <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-            <i data-lucide="coins" class="w-4 h-4 text-indigo-400"></i> Currency & Status
+      <!-- Mobile Quick Template Selector Pill Bar -->
+      <div class="lg:hidden p-3 border-b border-slate-800 bg-slate-950/60">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <i data-lucide="layout" class="w-3.5 h-3.5 text-indigo-400"></i> Active Template
           </span>
-          <span class="text-[10px] text-slate-400 font-mono" id="sidebarCurrencySymbol">₹ INR</span>
+          <button onclick="openTemplateModal()" class="text-xs font-bold text-indigo-400 flex items-center gap-1">
+            <span>Browse All (5)</span>
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
         </div>
-
-        <div>
-          <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Currency Format</label>
-          <div class="grid grid-cols-4 gap-1 text-center font-bold">
-            <button onclick="setCurrency('₹')" class="curr-selector-btn py-1.5 rounded border border-indigo-500 bg-indigo-500/20 text-indigo-300" data-curr="₹">₹ INR</button>
-            <button onclick="setCurrency('$')" class="curr-selector-btn py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-slate-300" data-curr="$">$ USD</button>
-            <button onclick="setCurrency('€')" class="curr-selector-btn py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-slate-300" data-curr="€">€ EUR</button>
-            <button onclick="setCurrency('£')" class="curr-selector-btn py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-slate-300" data-curr="£">£ GBP</button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Invoice State Badge</label>
-          <div class="grid grid-cols-4 gap-1 text-center font-bold text-[10px]">
-            <button onclick="setStatus('PAID')" id="status-paid" class="status-btn py-1 rounded border border-slate-700 hover:bg-slate-700 text-emerald-400">PAID</button>
-            <button onclick="setStatus('PENDING')" id="status-pending" class="status-btn py-1 rounded border border-amber-500 bg-amber-500/20 text-amber-300">PENDING</button>
-            <button onclick="setStatus('OVERDUE')" id="status-overdue" class="status-btn py-1 rounded border border-slate-700 hover:bg-slate-700 text-rose-400">OVERDUE</button>
-            <button onclick="setStatus('DRAFT')" id="status-draft" class="status-btn py-1 rounded border border-slate-700 hover:bg-slate-700 text-slate-400">DRAFT</button>
-          </div>
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <button onclick="switchTemplate('modern')" id="mobPill-modern" class="mob-pill flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white">Modern Tech</button>
+          <button onclick="switchTemplate('minimal')" id="mobPill-minimal" class="mob-pill flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300">Minimal</button>
+          <button onclick="switchTemplate('creative')" id="mobPill-creative" class="mob-pill flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300">Creative</button>
+          <button onclick="switchTemplate('corporate')" id="mobPill-corporate" class="mob-pill flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300">Corporate</button>
+          <button onclick="switchTemplate('sidebar')" id="mobPill-sidebar" class="mob-pill flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300">Sidebar</button>
         </div>
       </div>
 
-      <!-- Financial Calculation (Tax, GST, Discount, Paid Amount) -->
-      <div class="bg-slate-850 bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60">
-          <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-            <i data-lucide="calculator" class="w-4 h-4 text-indigo-400"></i> Taxes & Adjustments
-          </span>
-          <button onclick="setQuickGST(18)" class="text-[10px] font-bold text-indigo-400 hover:underline">18% GST Toggle</button>
-        </div>
+      <!-- Scrollable Form Container -->
+      <div class="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-4 text-xs text-slate-300 pb-28 lg:pb-10">
 
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[11px] text-slate-400 mb-1">Tax / GST (%)</label>
-            <div class="relative">
-              <input type="number" id="ctrlTaxRate" value="18" min="0" max="100" step="0.5" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-              <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs">%</span>
-            </div>
+        <!-- 1. INVOICE META & STATUS -->
+        <div class="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
+            <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+              <i data-lucide="file-check-2" class="w-4 h-4 text-indigo-400"></i> Invoice Meta & Status
+            </span>
+            <span id="currentStatusDisplay" class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              PENDING
+            </span>
           </div>
-          <div>
-            <label class="block text-[11px] text-slate-400 mb-1">Discount</label>
-            <div class="flex">
-              <input type="number" id="ctrlDiscount" value="0" min="0" step="1" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-l-lg px-2 py-1.5 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-              <select id="ctrlDiscountType" onchange="syncStateFromInputs()" class="bg-slate-800 border-y border-r border-slate-700 rounded-r-lg px-1 text-slate-300 text-xs focus:outline-none font-bold">
-                <option value="%">%</option>
-                <option value="flat">Flat</option>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">Invoice Number</label>
+              <input type="text" id="formInvNumber" value="INV-2026-089" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">Currency</label>
+              <select id="formCurrency" onchange="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-slate-100 font-bold text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                <option value="₹" selected>₹ INR (Rupees)</option>
+                <option value="$">$ USD (Dollars)</option>
+                <option value="€">€ EUR (Euros)</option>
+                <option value="£">£ GBP (Pounds)</option>
               </select>
             </div>
           </div>
-        </div>
 
-        <div>
-          <label class="block text-[11px] text-slate-400 mb-1">Already Paid Amount (Deposit)</label>
-          <div class="relative">
-            <span class="absolute left-2.5 top-1.5 text-slate-500 font-mono text-xs" id="paidSymbolPrefix">₹</span>
-            <input type="number" id="ctrlPaidAmount" value="0" min="0" step="100" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-2.5 py-1.5 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">Issue Date</label>
+              <input type="date" id="formInvDate" value="2026-10-19" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-2 text-slate-200 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">Due Date</label>
+              <input type="date" id="formInvDueDate" value="2026-10-29" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-2 text-slate-200 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Payment Status</label>
+            <div class="grid grid-cols-4 gap-1 text-center font-bold text-[10px]">
+              <button type="button" onclick="setStatus('PAID')" id="statusBtn-paid" class="status-tab py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 text-emerald-400 transition-colors">PAID</button>
+              <button type="button" onclick="setStatus('PENDING')" id="statusBtn-pending" class="status-tab py-1.5 rounded-lg border border-amber-500 bg-amber-500/20 text-amber-300 transition-colors">DUE</button>
+              <button type="button" onclick="setStatus('OVERDUE')" id="statusBtn-overdue" class="status-tab py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 text-rose-400 transition-colors">OVERDUE</button>
+              <button type="button" onclick="setStatus('DRAFT')" id="statusBtn-draft" class="status-tab py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 text-slate-400 transition-colors">DRAFT</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- UPI Payment Settings -->
-      <div class="bg-slate-850 bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60">
-          <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-            <i data-lucide="qr-code" class="w-4 h-4 text-emerald-400"></i> UPI Instant Pay Setup
-          </span>
-          <button onclick="copyUpiId()" class="text-[10px] text-emerald-400 hover:underline flex items-center gap-1">
-            <i data-lucide="copy" class="w-3 h-3"></i> Copy UPI
+        <!-- 2. LINE ITEMS LIST & QUICK ADD -->
+        <div class="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
+            <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i> Service Line Items (<span id="itemsCountBadge">3</span>)
+            </span>
+            <button onclick="addNewLineItem()" class="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Item
+            </button>
+          </div>
+
+          <!-- Mobile Cards Container for Items -->
+          <div id="formItemsList" class="space-y-2.5">
+            <!-- Dynamically Rendered -->
+          </div>
+
+          <button onclick="addNewLineItem()" class="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Another Service
           </button>
         </div>
 
-        <div>
-          <label class="block text-[11px] text-slate-400 mb-1">UPI VPA Address</label>
-          <input type="text" id="ctrlUpiId" value="8667536739-2@ybl" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+        <!-- 3. FINANCIAL ADJUSTMENTS (GST, DISCOUNT, DEPOSIT) -->
+        <div class="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
+            <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+              <i data-lucide="calculator" class="w-4 h-4 text-indigo-400"></i> GST, Discount & Advance
+            </span>
+          </div>
+
+          <!-- GST Preset Toggles -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-[11px] font-medium text-slate-400">GST / Tax Rate (%)</label>
+              <div class="flex gap-1 text-[10px]">
+                <button type="button" onclick="setQuickGST(0)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 hover:text-white">0%</button>
+                <button type="button" onclick="setQuickGST(5)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 hover:text-white">5%</button>
+                <button type="button" onclick="setQuickGST(12)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 hover:text-white">12%</button>
+                <button type="button" onclick="setQuickGST(18)" class="px-1.5 py-0.5 rounded bg-indigo-600/30 text-indigo-300 font-bold border border-indigo-500/40">18% GST</button>
+                <button type="button" onclick="setQuickGST(28)" class="px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 hover:text-white">28%</button>
+              </div>
+            </div>
+            <div class="relative">
+              <input type="number" id="formTaxRate" value="18" min="0" max="100" step="0.5" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+              <span class="absolute right-3 top-2 text-slate-500 font-mono text-xs">%</span>
+            </div>
+          </div>
+
+          <!-- Discount -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">Discount</label>
+              <div class="flex">
+                <input type="number" id="formDiscount" value="0" min="0" step="1" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-l-xl px-2.5 py-2 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                <select id="formDiscountType" onchange="syncFromForm()" class="bg-slate-800 border-y border-r border-slate-700 rounded-r-xl px-1.5 text-slate-300 text-xs font-bold focus:outline-none">
+                  <option value="%">%</option>
+                  <option value="flat">₹ Flat</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-medium text-slate-400 mb-1">Advance Deposit</label>
+              <div class="relative">
+                <span class="absolute left-2.5 top-2 text-slate-500 font-mono text-xs" id="currencyPrefixDeposit">₹</span>
+                <input type="number" id="formPaidAmount" value="0" min="0" step="500" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-6 pr-2.5 py-2 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label class="block text-[11px] text-slate-400 mb-1">Payee Legal Name</label>
-          <input type="text" id="ctrlPayeeName" value="Praveenkumar" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+        <!-- 4. CLIENT RECIPIENT DETAILS -->
+        <div class="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
+            <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+              <i data-lucide="user-check" class="w-4 h-4 text-indigo-400"></i> Client Recipient (Billed To)
+            </span>
+          </div>
+
+          <div class="space-y-2">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Client Contact Name</label>
+              <input type="text" id="formClientName" value="Alex Rivera" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-100 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Company / Studio</label>
+              <input type="text" id="formClientCompany" value="Vanguard Media Inc." oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-100 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Billing Address & Location</label>
+              <input type="text" id="formClientAddress" value="Tower 4, Olympia Tech Park, Guindy, Chennai, TN" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-100 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Client Email</label>
+                <input type="email" id="formClientEmail" value="billing@vanguardmedia.co" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-100 text-xs font-mono focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">Client Phone</label>
+                <input type="text" id="formClientPhone" value="+91 98401 23456" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-slate-100 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="text-[11px] text-slate-400 leading-relaxed bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 flex items-start gap-2">
-          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5"></i>
-          <span>Auto-generates compliant QR with total balance due for GPay, PhonePe, Paytm, and BHIM UPI.</span>
+        <!-- 5. DYNAMIC UPI PAYMENT PREFERENCES -->
+        <div class="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-700/50">
+            <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+              <i data-lucide="qr-code" class="w-4 h-4 text-emerald-400"></i> UPI Instant Pay Setup
+            </span>
+            <button onclick="copyUpiId()" class="text-[10px] text-emerald-400 hover:underline flex items-center gap-1">
+              <i data-lucide="copy" class="w-3 h-3"></i> Copy
+            </button>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">UPI VPA Address</label>
+            <input type="text" id="formUpiId" value="8667536739-2@ybl" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Payee Name</label>
+            <input type="text" id="formPayeeName" value="Praveenkumar" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <!-- Quick Test UPI Button -->
+          <div class="pt-1 flex gap-2">
+            <button type="button" onclick="openUpiAppDirect()" class="flex-1 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-lg font-bold text-[11px] flex items-center justify-center gap-1.5">
+              <i data-lucide="external-link" class="w-3 h-3"></i> Test UPI App Link
+            </button>
+            <button type="button" onclick="openUpiModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-bold text-[11px] flex items-center gap-1 border border-slate-700">
+              <i data-lucide="maximize" class="w-3 h-3"></i> QR
+            </button>
+          </div>
         </div>
-      </div>
 
-      <!-- Quick Add Item Button in sidebar -->
-      <div>
-        <button onclick="addNewLineItem()" class="w-full py-2.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-indigo-200 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Service Line Item
-        </button>
-      </div>
+        <!-- 6. TERMS & NOTES -->
+        <div class="bg-slate-800/50 p-3.5 rounded-2xl border border-slate-700/60 space-y-3">
+          <div>
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Payment Terms</label>
+            <textarea id="formTerms" rows="2" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 text-xs leading-relaxed resize-none focus:ring-1 focus:ring-indigo-500 focus:outline-none">1. Net 10 days payment term applies.
+2. Final deliverables, raw projects & commercial licenses are released post balance settlement.</textarea>
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Notes / Appreciation</label>
+            <textarea id="formNotes" rows="2" oninput="syncFromForm()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 text-xs leading-relaxed resize-none focus:ring-1 focus:ring-indigo-500 focus:outline-none">Thank you for partnering with Praveenkumar Creative & Engineering Services. Bank transfer and instant UPI are both accepted.</textarea>
+          </div>
+        </div>
 
-      <!-- Print Guidelines Helper -->
-      <div class="p-3 bg-slate-800/40 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
-        <p class="font-bold text-slate-300 flex items-center gap-1">
-          <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-400"></i> A4 PDF Instructions:
-        </p>
-        <p>In browser print dialog, choose: <strong>Destination: Save as PDF</strong>, <strong>Margins: None</strong>, and ensure <strong>Background graphics: Checked</strong>.</p>
       </div>
-
     </aside>
 
-    <!-- MAIN CANVAS VIEWPORT (WITH REAL-TIME SCALING) -->
-    <main id="viewportContainer" class="flex-1 bg-slate-950 p-4 sm:p-8 overflow-auto flex justify-center items-start canvas-viewport">
+    <!-- ======================================================
+         RIGHT: LIVE A4 PREVIEW CANVAS (RESPONSIVE VIEWPORT)
+    ====================================================== -->
+    <main id="previewViewport" class="flex-1 bg-slate-950 p-2 sm:p-6 lg:p-8 overflow-auto flex justify-center items-start hidden lg:flex relative">
       
-      <!-- ZOOM WRAPPER -->
-      <div id="canvasScaler" class="transition-transform duration-150 origin-top">
+      <!-- Auto-Scaled / Pinchable Canvas Wrapper -->
+      <div id="canvasScaler" class="transition-transform duration-100 origin-top my-2 sm:my-0">
         
-        <!-- A4 PAPER CANVAS -->
-        <div id="invoiceCanvas" class="a4-sheet shadow-2xl rounded-sm">
-          <!-- Dynamically Rendered by Template Engine -->
+        <!-- Standard A4 Sheet Element -->
+        <div id="invoiceCanvas" class="a4-sheet text-slate-800">
+          <!-- Dynamically populated by active template function -->
         </div>
 
       </div>
@@ -371,112 +536,275 @@
 
   </div>
 
-  <!-- TOAST NOTIFICATION -->
-  <div id="toastMessage" class="no-print fixed bottom-6 right-6 z-50 bg-slate-900 text-white border border-slate-700 px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-xs translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
-    <span id="toastText">Action completed</span>
+  <!-- ========================================================
+       MOBILE STICKY BOTTOM ACTION DOCK (< 1024px)
+  ======================================================== -->
+  <nav id="mobileDock" class="no-print lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-3 py-2 flex items-center justify-around shadow-2xl">
+    <!-- View Switcher -->
+    <button onclick="toggleMobileView()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white px-2 py-1">
+      <div class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300">
+        <i data-lucide="eye" id="mobDockViewIcon" class="w-4 h-4"></i>
+      </div>
+      <span class="text-[10px] font-bold" id="mobDockViewText">A4 Paper</span>
+    </button>
+
+    <!-- Template Switcher Drawer -->
+    <button onclick="openTemplateModal()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white px-2 py-1">
+      <div class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300">
+        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+      </div>
+      <span class="text-[10px] font-bold">Template</span>
+    </button>
+
+    <!-- Quick Add Item -->
+    <button onclick="addNewLineItem(); setMobileView('edit');" class="flex flex-col items-center gap-1 text-indigo-400 hover:text-indigo-300 px-2 py-1">
+      <div class="w-8 h-8 rounded-xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+      </div>
+      <span class="text-[10px] font-bold">Add Item</span>
+    </button>
+
+    <!-- QR Pay Modal -->
+    <button onclick="openUpiModal()" class="flex flex-col items-center gap-1 text-emerald-400 hover:text-emerald-300 px-2 py-1">
+      <div class="w-8 h-8 rounded-xl bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+        <i data-lucide="qr-code" class="w-4 h-4"></i>
+      </div>
+      <span class="text-[10px] font-bold">UPI QR</span>
+    </button>
+
+    <!-- Download PDF -->
+    <button onclick="triggerPrintPDF()" class="flex flex-col items-center gap-1 text-white px-3 py-1 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/40 active:scale-95">
+      <i data-lucide="printer" class="w-4 h-4"></i>
+      <span class="text-[10px] font-extrabold tracking-tight">Print PDF</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================
+       MODAL: TEMPLATE SELECTOR (MOBILE & DESKTOP)
+  ======================================================== -->
+  <div id="templateModal" class="no-print fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-all duration-200">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-lg p-5 space-y-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layout-template" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="font-extrabold text-white text-base">Select A4 Template Design</h3>
+        </div>
+        <button onclick="closeTemplateModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="templateCardsList">
+        <!-- Modern Tech -->
+        <div onclick="selectAndCloseTemplate('modern')" class="p-3.5 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-indigo-500 cursor-pointer transition-all flex flex-col justify-between group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-slate-200 text-sm group-hover:text-indigo-400">Modern Tech</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Default</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Crisp rounded cards, accent highlights, optimized for video & digital deliverables.</p>
+        </div>
+
+        <!-- Minimal Clean -->
+        <div onclick="selectAndCloseTemplate('minimal')" class="p-3.5 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-indigo-500 cursor-pointer transition-all flex flex-col justify-between group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-slate-200 text-sm group-hover:text-indigo-400">Minimal Clean</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">Airy</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Monochrome hairline aesthetics, ample whitespace, high typography focus.</p>
+        </div>
+
+        <!-- Creative Studio -->
+        <div onclick="selectAndCloseTemplate('creative')" class="p-3.5 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-indigo-500 cursor-pointer transition-all flex flex-col justify-between group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-slate-200 text-sm group-hover:text-indigo-400">Creative Studio</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300">Bold</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Bold colorful banner header, milestone tables, customized for YouTube & media producers.</p>
+        </div>
+
+        <!-- Corporate Exec -->
+        <div onclick="selectAndCloseTemplate('corporate')" class="p-3.5 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-indigo-500 cursor-pointer transition-all flex flex-col justify-between group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-slate-200 text-sm group-hover:text-indigo-400">Corporate Exec</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Formal</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Double-ruled borders, serif header, formal consultant and enterprise layout.</p>
+        </div>
+
+        <!-- Split Sidebar -->
+        <div onclick="selectAndCloseTemplate('sidebar')" class="p-3.5 rounded-xl border border-slate-700 bg-slate-800/60 hover:border-indigo-500 cursor-pointer transition-all flex flex-col justify-between group sm:col-span-2">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-slate-200 text-sm group-hover:text-indigo-400">Split Sidebar</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">2-Column</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">Full-height colored metadata column on the left with dedicated QR housing and clean item sheet.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- ==========================================================
-       JAVASCRIPT APPLICATION LOGIC
-  ========================================================== -->
+  <!-- ========================================================
+       MODAL: ACCENT THEME COLOR
+  ======================================================== -->
+  <div id="themeModal" class="no-print fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-all duration-200">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-2xl w-full max-w-sm p-5 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="font-bold text-white text-sm flex items-center gap-2">
+          <i data-lucide="palette" class="w-4 h-4 text-indigo-400"></i> Theme Accent Color
+        </h3>
+        <button onclick="closeThemeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3" id="themeModalList"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: FULLSCREEN UPI QR CODE VIEWER
+  ======================================================== -->
+  <div id="upiModal" class="no-print fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-200">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">Instant UPI Payment</span>
+        </div>
+        <button onclick="closeUpiModal()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-800"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <!-- Centered QR Box -->
+      <div class="bg-white p-4 rounded-2xl shadow-xl inline-block mx-auto">
+        <div id="modalQrCodeContainer" class="w-[180px] h-[180px]"></div>
+      </div>
+
+      <div>
+        <p class="text-xs text-slate-400">Amount Due:</p>
+        <p class="text-2xl font-black font-mono text-white mt-0.5" id="modalQrAmountDisplay">₹0.00</p>
+      </div>
+
+      <div class="p-3 rounded-xl bg-slate-800/80 border border-slate-700/80 text-left space-y-1 text-xs">
+        <div class="flex justify-between">
+          <span class="text-slate-400">VPA:</span>
+          <span class="font-mono font-bold text-slate-200" id="modalQrUpiId">8667536739-2@ybl</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-400">Payee:</span>
+          <span class="font-bold text-slate-200">Praveenkumar</span>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="copyUpiId()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-colors">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy UPI
+        </button>
+        <button onclick="openUpiAppDirect()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 transition-colors">
+          <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Pay via App
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastNotification" class="no-print fixed top-5 right-5 sm:bottom-6 sm:top-auto z-50 bg-slate-900/95 text-white border border-slate-700 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 text-xs translate-y-[-100px] sm:translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+    <span id="toastNotificationText" class="font-medium">Action complete</span>
+  </div>
+
+  <!-- ========================================================
+       APPLICATION LOGIC & REACTIVE STORE
+  ======================================================== -->
   <script>
-    /* ==========================================================
-       CENTRAL REACTIVE STATE
-    ========================================================== */
+    /* --------------------------------------------------------
+       CENTRAL STATE
+    -------------------------------------------------------- */
     const STATE = {
-      template: 'modern', // 'modern', 'minimal', 'creative', 'corporate', 'sidebar'
+      template: 'modern',
       accent: '#4f46e5',
-      zoom: 0.85,
       currency: '₹',
       status: 'PENDING',
-      
-      // Praveenkumar Personal Defaults
+      mobileView: 'edit', // 'edit' or 'preview'
+      desktopZoom: 0.85,
+
       company: {
         name: 'Praveenkumar',
         title: 'Video Editor & Web Developer',
         email: 'praveenkumarcse2001@gmail.com',
         phone: '+91 8667536739',
-        location: 'Tamil Nadu, India',
-        tagline: 'High-Impact Video Post-Production & Modern Web Architectures'
+        location: 'Tamil Nadu, India'
       },
 
-      // Client Data
       client: {
         name: 'Alex Rivera',
-        company: 'Vanguard Studios & Media Inc.',
+        company: 'Vanguard Media Inc.',
         email: 'billing@vanguardmedia.co',
         phone: '+91 98401 23456',
-        address: 'Tower 4, Olympia Tech Park, Guindy, Chennai, TN 600032'
+        address: 'Tower 4, Olympia Tech Park, Guindy, Chennai, TN'
       },
 
-      // Invoice Metadata
       invoice: {
         number: 'INV-2026-089',
         date: '2026-10-19',
         dueDate: '2026-10-29',
-        taxRate: 18, // 18% GST
+        taxRate: 18,
         discount: 0,
         discountType: '%',
         paidAmount: 0,
         upiId: '8667536739-2@ybl',
         payeeName: 'Praveenkumar',
-        notes: 'Thank you for choosing Praveenkumar Creative & Engineering Services. Bank transfer or instant UPI payment are both accepted.',
-        terms: '1. Net 10 days payment term applies.\n2. Final deliverables, raw projects & commercial licenses are released post balance settlement.'
+        terms: '1. Net 10 days payment term applies.\n2. Final deliverables, raw projects & commercial licenses are released post balance settlement.',
+        notes: 'Thank you for partnering with Praveenkumar Creative & Engineering Services. Bank transfer and instant UPI are both accepted.'
       },
 
-      // Line Items
       items: [
         {
           id: 1,
-          name: '4K Commercial Video Editing & Cinematic Color Grading',
-          desc: 'Timeline editing, multi-cam audio synchronization, DaVinci Resolve color grading & delivery.',
+          name: '4K Commercial Video Editing & Color Grading (DaVinci Resolve)',
+          desc: 'Timeline editing, multi-cam audio synch, DaVinci Resolve color grading & delivery.',
           qty: 1,
-          rate: 18500
+          rate: 18000
         },
         {
           id: 2,
-          name: 'Full-Stack Next.js / Tailwind Responsive Web App',
-          desc: 'Dynamic application with modern interactive UX, mobile-first design, SEO, and deployment.',
+          name: 'Responsive Web App / Landing Page (Next.js & Tailwind)',
+          desc: 'High-performance interactive web application, modern UI/UX, SEO & deployment.',
           qty: 1,
-          rate: 26000
+          rate: 25000
         },
         {
           id: 3,
-          name: 'Social Media Vertical Cutdowns & Motion Graphics (Reels/Shorts)',
-          desc: 'High-retention captions, kinetic typography, SFX pack, and custom 9:16 export sets.',
-          qty: 4,
-          rate: 2500
+          name: 'Motion Graphics Title Pack & YouTube Intro',
+          desc: 'Custom kinetic typography, sound effects, vertical 9:16 reels package.',
+          qty: 1,
+          rate: 7000
         }
       ]
     };
 
-    const THEME_PRESETS = [
+    const THEME_OPTIONS = [
       { name: 'Indigo', color: '#4f46e5' },
       { name: 'Emerald', color: '#059669' },
       { name: 'Crimson', color: '#e11d48' },
       { name: 'Amber', color: '#d97706' },
-      { name: 'Slate', color: '#334155' },
-      { name: 'Violet', color: '#7c3aed' }
+      { name: 'Violet', color: '#7c3aed' },
+      { name: 'Slate Dark', color: '#334155' }
     ];
 
-    /* ==========================================================
-       LIFECYCLE INIT
-    ========================================================== */
+    /* --------------------------------------------------------
+       LIFECYCLE INITIALIZATION
+    -------------------------------------------------------- */
     window.addEventListener('DOMContentLoaded', () => {
-      loadFromLocalStorage();
-      buildThemePalette();
-      applyZoom();
+      loadSavedState();
+      buildThemeOptions();
+      renderMobileItemsList();
       renderInvoice();
-      updateSidebarInputs();
+      autoScaleMobilePreview();
+      window.addEventListener('resize', autoScaleMobilePreview);
       lucide.createIcons();
     });
 
-    /* ==========================================================
-       CALCULATIONS
-    ========================================================== */
-    function calculateTotals() {
-      const subtotal = STATE.items.reduce((sum, item) => sum + (Number(item.qty || 0) * Number(item.rate || 0)), 0);
+    /* --------------------------------------------------------
+       MATH / TOTALS COMPUTATION
+    -------------------------------------------------------- */
+    function getTotals() {
+      const subtotal = STATE.items.reduce((acc, it) => acc + (Number(it.qty || 0) * Number(it.rate || 0)), 0);
       
       let discountVal = 0;
       if (STATE.invoice.discountType === '%') {
@@ -485,36 +813,241 @@
         discountVal = Number(STATE.invoice.discount || 0);
       }
 
-      const taxableAmount = Math.max(0, subtotal - discountVal);
-      const taxAmount = taxableAmount * (Number(STATE.invoice.taxRate || 0) / 100);
-      const grandTotal = Math.round((taxableAmount + taxAmount) * 100) / 100;
+      const taxable = Math.max(0, subtotal - discountVal);
+      const taxAmount = taxable * (Number(STATE.invoice.taxRate || 0) / 100);
+      const grandTotal = Math.round((taxable + taxAmount) * 100) / 100;
       const balanceDue = Math.max(0, grandTotal - Number(STATE.invoice.paidAmount || 0));
 
-      return {
-        subtotal,
-        discountVal,
-        taxAmount,
-        grandTotal,
-        balanceDue
-      };
+      return { subtotal, discountVal, taxAmount, grandTotal, balanceDue };
     }
 
-    function formatMoney(amount) {
-      return Number(amount || 0).toLocaleString('en-IN', {
+    function formatNumber(val) {
+      return Number(val || 0).toLocaleString('en-IN', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
     }
 
-    /* ==========================================================
-       TEMPLATE RENDER ENGINE
-    ========================================================== */
+    /* --------------------------------------------------------
+       MOBILE VIEWPORT CONTROLS
+    -------------------------------------------------------- */
+    function setMobileView(view) {
+      STATE.mobileView = view;
+      const sidebar = document.getElementById('sidebarDrawer');
+      const preview = document.getElementById('previewViewport');
+      const tabEdit = document.getElementById('mobileTabEdit');
+      const tabPrev = document.getElementById('mobileTabPreview');
+      const dockIcon = document.getElementById('mobDockViewIcon');
+      const dockText = document.getElementById('mobDockViewText');
+
+      if (view === 'edit') {
+        sidebar.classList.remove('hidden');
+        preview.classList.add('hidden');
+        preview.classList.remove('flex');
+        
+        tabEdit.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm';
+        tabPrev.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5';
+        
+        dockIcon.setAttribute('data-lucide', 'file-text');
+        dockText.textContent = 'A4 Paper';
+      } else {
+        sidebar.classList.add('hidden');
+        preview.classList.remove('hidden');
+        preview.classList.add('flex');
+
+        tabPrev.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm';
+        tabEdit.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5';
+
+        dockIcon.setAttribute('data-lucide', 'edit-3');
+        dockText.textContent = 'Edit Form';
+
+        // Auto scale right when entering preview mode
+        setTimeout(autoScaleMobilePreview, 40);
+      }
+      lucide.createIcons();
+    }
+
+    function toggleMobileView() {
+      setMobileView(STATE.mobileView === 'edit' ? 'preview' : 'edit');
+    }
+
+    function autoScaleMobilePreview() {
+      const container = document.getElementById('previewViewport');
+      const scaler = document.getElementById('canvasScaler');
+      if (!container || !scaler) return;
+
+      if (window.innerWidth < 1024) {
+        // Fit canvas perfectly inside device width with comfortable padding
+        const containerWidth = container.clientWidth - 24; // 12px each side
+        const a4WidthPx = 794; // approx standard 210mm in standard 96dpi pixels
+        const scale = Math.min(1, Math.max(0.35, containerWidth / a4WidthPx));
+        scaler.style.transform = `scale(${scale})`;
+      } else {
+        scaler.style.transform = `scale(${STATE.desktopZoom})`;
+        const text = document.getElementById('desktopZoomText');
+        if (text) text.textContent = `${Math.round(STATE.desktopZoom * 100)}%`;
+      }
+    }
+
+    function adjustDesktopZoom(delta) {
+      STATE.desktopZoom = Math.min(1.3, Math.max(0.4, Math.round((STATE.desktopZoom + delta) * 100) / 100));
+      autoScaleMobilePreview();
+    }
+
+    function fitToScreen() {
+      STATE.desktopZoom = 0.85;
+      autoScaleMobilePreview();
+    }
+
+    /* --------------------------------------------------------
+       ITEMS LIST (MOBILE FORM SYNCHRONIZATION)
+    -------------------------------------------------------- */
+    function renderMobileItemsList() {
+      const container = document.getElementById('formItemsList');
+      if (!container) return;
+
+      document.getElementById('itemsCountBadge').textContent = STATE.items.length;
+
+      container.innerHTML = STATE.items.map((item, index) => {
+        const lineTotal = Number(item.qty || 0) * Number(item.rate || 0);
+        return `
+          <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <span class="w-5 h-5 rounded-full bg-slate-800 text-slate-400 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">${index + 1}</span>
+              <input type="text" value="${escapeHtml(item.name)}" oninput="updateLineItemProp(${index}, 'name', this.value)" class="w-full bg-transparent border-b border-slate-700/60 pb-1 text-slate-100 font-bold text-xs focus:border-indigo-500 focus:outline-none" placeholder="Service / Deliverable title">
+              <button onclick="removeLineItem(${index})" title="Delete item" class="text-slate-400 hover:text-rose-400 p-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <input type="text" value="${escapeHtml(item.desc || '')}" oninput="updateLineItemProp(${index}, 'desc', this.value)" class="w-full bg-transparent text-[11px] text-slate-400 focus:text-slate-200 focus:outline-none" placeholder="Scope / tools used (e.g. DaVinci, Next.js, 9:16 format)">
+
+            <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800 items-center">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block mb-0.5">Quantity</span>
+                <input type="number" min="1" step="any" value="${item.qty}" oninput="updateLineItemProp(${index}, 'qty', parseFloat(this.value) || 0)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-100 text-xs font-mono text-center">
+              </div>
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block mb-0.5">Rate (${STATE.currency})</span>
+                <input type="number" min="0" step="any" value="${item.rate}" oninput="updateLineItemProp(${index}, 'rate', parseFloat(this.value) || 0)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-100 text-xs font-mono text-right">
+              </div>
+              <div class="text-right">
+                <span class="text-[9px] uppercase font-bold text-slate-400 block mb-0.5">Total</span>
+                <span class="font-mono font-bold text-xs text-indigo-400">${STATE.currency}${formatNumber(lineTotal)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function addNewLineItem() {
+      STATE.items.push({
+        id: Date.now(),
+        name: 'New Production Milestone Deliverable',
+        desc: 'Custom deliverables, post-production edit pass & asset package.',
+        qty: 1,
+        rate: 5000
+      });
+      renderMobileItemsList();
+      renderInvoice();
+      showToast('Line item added');
+    }
+
+    function removeLineItem(index) {
+      if (STATE.items.length <= 1) {
+        showToast('At least 1 item is required');
+        return;
+      }
+      STATE.items.splice(index, 1);
+      renderMobileItemsList();
+      renderInvoice();
+      showToast('Line item removed');
+    }
+
+    function updateLineItemProp(index, prop, value) {
+      if (STATE.items[index]) {
+        STATE.items[index][prop] = value;
+        renderInvoice();
+      }
+    }
+
+    /* --------------------------------------------------------
+       SYNC FROM MOBILE/SIDEBAR FORM INTO STATE
+    -------------------------------------------------------- */
+    function syncFromForm() {
+      STATE.invoice.number = document.getElementById('formInvNumber').value;
+      STATE.currency = document.getElementById('formCurrency').value;
+      STATE.invoice.date = document.getElementById('formInvDate').value;
+      STATE.invoice.dueDate = document.getElementById('formInvDueDate').value;
+
+      STATE.invoice.taxRate = parseFloat(document.getElementById('formTaxRate').value) || 0;
+      STATE.invoice.discount = parseFloat(document.getElementById('formDiscount').value) || 0;
+      STATE.invoice.discountType = document.getElementById('formDiscountType').value;
+      STATE.invoice.paidAmount = parseFloat(document.getElementById('formPaidAmount').value) || 0;
+
+      STATE.client.name = document.getElementById('formClientName').value;
+      STATE.client.company = document.getElementById('formClientCompany').value;
+      STATE.client.address = document.getElementById('formClientAddress').value;
+      STATE.client.email = document.getElementById('formClientEmail').value;
+      STATE.client.phone = document.getElementById('formClientPhone').value;
+
+      STATE.invoice.upiId = document.getElementById('formUpiId').value.trim();
+      STATE.invoice.payeeName = document.getElementById('formPayeeName').value.trim();
+
+      STATE.invoice.terms = document.getElementById('formTerms').value;
+      STATE.invoice.notes = document.getElementById('formNotes').value;
+
+      document.getElementById('currencyPrefixDeposit').textContent = STATE.currency;
+
+      renderMobileItemsList();
+      renderInvoice();
+    }
+
+    function setStatus(statusKey) {
+      STATE.status = statusKey;
+      document.querySelectorAll('.status-tab').forEach(b => {
+        b.className = 'status-tab py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700 text-slate-300 transition-colors';
+      });
+
+      const active = document.getElementById(`statusBtn-${statusKey.toLowerCase()}`);
+      if (active) {
+        active.className = `status-tab py-1.5 rounded-lg border font-bold ${
+          statusKey === 'PAID' ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300' :
+          statusKey === 'PENDING' ? 'border-amber-500 bg-amber-500/20 text-amber-300' :
+          statusKey === 'OVERDUE' ? 'border-rose-500 bg-rose-500/20 text-rose-300' :
+          'border-slate-500 bg-slate-500/20 text-slate-300'
+        }`;
+      }
+
+      const display = document.getElementById('currentStatusDisplay');
+      if (display) {
+        display.textContent = statusKey === 'PENDING' ? 'DUE' : statusKey;
+        display.className = `px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border ${
+          statusKey === 'PAID' ? 'border-emerald-500/40 bg-emerald-500/20 text-emerald-300' :
+          statusKey === 'PENDING' ? 'border-amber-500/40 bg-amber-500/20 text-amber-300' :
+          statusKey === 'OVERDUE' ? 'border-rose-500/40 bg-rose-500/20 text-rose-300' :
+          'border-slate-500/40 bg-slate-500/20 text-slate-300'
+        }`;
+      }
+
+      renderInvoice();
+      showToast(`Status: ${statusKey}`);
+    }
+
+    function setQuickGST(val) {
+      document.getElementById('formTaxRate').value = val;
+      syncFromForm();
+      showToast(`GST set to ${val}%`);
+    }
+
+    /* --------------------------------------------------------
+       TEMPLATE RENDER ENGINE (5 DISTINCT DESIGNS)
+    -------------------------------------------------------- */
     function renderInvoice() {
       const canvas = document.getElementById('invoiceCanvas');
-      const totals = calculateTotals();
-
-      // Reset classes
-      canvas.className = 'a4-sheet shadow-2xl rounded-sm';
+      const totals = getTotals();
 
       switch (STATE.template) {
         case 'minimal':
@@ -535,180 +1068,151 @@
           break;
       }
 
-      // Re-generate dynamic UPI QR in the current template
+      // Re-generate live UPI QR
       setTimeout(() => {
         generateUpiQrCode(totals.balanceDue > 0 ? totals.balanceDue : totals.grandTotal);
         lucide.createIcons();
-      }, 30);
+      }, 20);
     }
 
-    /* ----------------------------------------------------------
-       TEMPLATE 1: MODERN TECH
-    ---------------------------------------------------------- */
+    /* --- TEMPLATE 1: MODERN TECH --- */
     function getModernTemplateHTML(t) {
       return `
         <div class="p-10 flex-1 flex flex-col justify-between">
           <div>
-            <!-- Header Bar -->
+            <!-- Header -->
             <div class="flex justify-between items-start pb-6 border-b-2" style="border-color: ${STATE.accent};">
               <div class="space-y-1 max-w-sm">
                 <div class="flex items-center gap-2.5">
-                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-sm" style="background-color: ${STATE.accent};">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-extrabold text-base shadow" style="background-color: ${STATE.accent};">
                     PK
                   </div>
                   <div>
-                    <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="field-input font-extrabold text-xl text-slate-900 tracking-tight leading-none" placeholder="Your Name">
-                    <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="field-input text-xs font-semibold uppercase tracking-wider" style="color: ${STATE.accent};" placeholder="Title">
+                    <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateCanvasField('company.name', this.value)" class="field-input font-extrabold text-xl text-slate-900 tracking-tight leading-none">
+                    <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateCanvasField('company.title', this.value)" class="field-input text-xs font-semibold uppercase tracking-wider" style="color: ${STATE.accent};">
                   </div>
                 </div>
-                <div class="text-[11px] text-slate-500 pt-1 leading-snug space-y-0.5">
-                  <div class="flex items-center gap-1.5"><i data-lucide="mail" class="w-3 h-3 text-slate-400"></i> <input type="text" value="${escapeHtml(STATE.company.email)}" oninput="updateField('company.email', this.value)" class="field-input text-slate-600"></div>
-                  <div class="flex items-center gap-1.5"><i data-lucide="phone" class="w-3 h-3 text-slate-400"></i> <input type="text" value="${escapeHtml(STATE.company.phone)}" oninput="updateField('company.phone', this.value)" class="field-input text-slate-600"></div>
-                  <div class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3 h-3 text-slate-400"></i> <input type="text" value="${escapeHtml(STATE.company.location)}" oninput="updateField('company.location', this.value)" class="field-input text-slate-600"></div>
+                <div class="text-[11px] text-slate-500 pt-1 space-y-0.5">
+                  <p class="flex items-center gap-1.5"><i data-lucide="mail" class="w-3 h-3 text-slate-400"></i> ${escapeHtml(STATE.company.email)}</p>
+                  <p class="flex items-center gap-1.5"><i data-lucide="phone" class="w-3 h-3 text-slate-400"></i> ${escapeHtml(STATE.company.phone)}</p>
+                  <p class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3 h-3 text-slate-400"></i> ${escapeHtml(STATE.company.location)}</p>
                 </div>
               </div>
 
-              <!-- Invoice Meta & Badge -->
+              <!-- Meta & Badge -->
               <div class="text-right space-y-2">
                 <div class="flex items-center justify-end gap-2">
                   <span class="font-black text-2xl tracking-tight text-slate-900">INVOICE</span>
                   ${getStatusBadgeHTML()}
                 </div>
                 <div class="text-[11px] space-y-1">
-                  <div class="flex justify-end gap-2">
-                    <span class="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Invoice #:</span>
-                    <input type="text" value="${escapeHtml(STATE.invoice.number)}" oninput="updateField('invoice.number', this.value)" class="field-input font-mono font-bold text-slate-800 text-right w-28">
-                  </div>
-                  <div class="flex justify-end gap-2">
-                    <span class="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Date:</span>
-                    <input type="date" value="${STATE.invoice.date}" oninput="updateField('invoice.date', this.value)" class="field-input text-slate-700 text-right w-28">
-                  </div>
-                  <div class="flex justify-end gap-2">
-                    <span class="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Due Date:</span>
-                    <input type="date" value="${STATE.invoice.dueDate}" oninput="updateField('invoice.dueDate', this.value)" class="field-input font-bold text-slate-900 text-right w-28">
-                  </div>
+                  <div><span class="text-slate-400 uppercase text-[9px] font-bold">Invoice #:</span> <strong class="font-mono text-slate-800">${escapeHtml(STATE.invoice.number)}</strong></div>
+                  <div><span class="text-slate-400 uppercase text-[9px] font-bold">Issued:</span> <strong class="text-slate-700">${STATE.invoice.date}</strong></div>
+                  <div><span class="text-slate-400 uppercase text-[9px] font-bold">Due:</span> <strong class="text-slate-900">${STATE.invoice.dueDate}</strong></div>
                 </div>
               </div>
             </div>
 
-            <!-- Client & Project Cards -->
+            <!-- Client & Project Info Cards -->
             <div class="grid grid-cols-2 gap-4 my-5">
-              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
-                  <i data-lucide="user" class="w-3 h-3"></i> Billed To Client
-                </p>
-                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="field-input font-bold text-slate-900 text-xs" placeholder="Client Name">
-                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="field-input text-[11px] text-slate-600 font-medium" placeholder="Company Name">
-                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="field-input text-[11px] text-slate-500" placeholder="Address">
-                <input type="text" value="${escapeHtml(STATE.client.email)}" oninput="updateField('client.email', this.value)" class="field-input text-[10px] text-slate-400 font-mono" placeholder="Email">
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1">Billed To (Client)</p>
+                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateCanvasField('client.name', this.value)" class="field-input font-bold text-slate-900 text-xs">
+                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateCanvasField('client.company', this.value)" class="field-input text-[11px] text-slate-600">
+                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateCanvasField('client.address', this.value)" class="field-input text-[10px] text-slate-500">
+                <p class="text-[10px] font-mono text-slate-400 pt-0.5">${escapeHtml(STATE.client.email)}</p>
               </div>
 
-              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between">
                 <div>
-                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
-                    <i data-lucide="layers" class="w-3 h-3"></i> Project Scope
-                  </p>
-                  <p class="text-xs font-bold text-slate-800">Video Post-Production & Web Handover</p>
-                  <p class="text-[11px] text-slate-500 mt-0.5">Deliverables: Master 4K exports, Next.js code repo.</p>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1">Project Assignment</p>
+                  <p class="text-xs font-bold text-slate-900">Video Post-Production & Web Handover</p>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Deliverables: DaVinci 4K exports, Next.js repo.</p>
                 </div>
-                <div class="pt-2 border-t border-slate-200/80 flex justify-between items-center text-[10px]">
-                  <span class="text-slate-500">Terms: <strong class="text-slate-800">Net 10 Days</strong></span>
+                <div class="pt-2 border-t border-slate-200 flex justify-between items-center text-[10px]">
+                  <span class="text-slate-500">Payment Terms: <strong class="text-slate-800">Net 10 Days</strong></span>
                   <span class="font-mono font-bold text-slate-700 bg-slate-200/60 px-1.5 py-0.5 rounded">${STATE.currency} Billing</span>
                 </div>
               </div>
             </div>
 
-            <!-- Items Table -->
+            <!-- Table -->
             <div class="overflow-hidden rounded-xl border border-slate-200">
               <table class="w-full text-left text-xs">
-                <thead class="bg-slate-100 text-slate-800 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                <thead class="bg-slate-100 text-slate-800 font-bold uppercase text-[9px] tracking-wider border-b border-slate-200">
                   <tr>
                     <th class="py-2.5 px-3 w-[52%]">Deliverable / Description</th>
                     <th class="py-2.5 px-2 text-right w-[12%]">Qty/Hrs</th>
                     <th class="py-2.5 px-2 text-right w-[16%]">Rate (${STATE.currency})</th>
-                    <th class="py-2.5 px-3 text-right w-[16%]">Total (${STATE.currency})</th>
-                    <th class="py-2.5 px-1 text-center w-[4%] no-print"></th>
+                    <th class="py-2.5 px-3 text-right w-[20%]">Total (${STATE.currency})</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  ${getItemsTableRowsHTML()}
+                  ${getTableRowsCanvasHTML()}
                 </tbody>
               </table>
             </div>
-
-            <div class="mt-2 no-print add-row-container">
-              <button onclick="addNewLineItem()" class="text-xs font-semibold px-2.5 py-1 rounded text-indigo-600 hover:bg-indigo-50 flex items-center gap-1 transition-colors">
-                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Item
-              </button>
-            </div>
           </div>
 
-          <!-- Bottom Section: Payment UPI & Totals -->
+          <!-- Footer Area with Totals and UPI -->
           <div class="pt-4 border-t border-slate-200 grid grid-cols-12 gap-5 items-end">
             <div class="col-span-7 space-y-3">
-              ${getUpiCardHTML()}
+              ${getCanvasUpiCardHTML()}
               <div>
-                <p class="text-[9px] font-bold uppercase text-slate-400">Payment Terms</p>
-                <textarea oninput="updateField('invoice.terms', this.value)" rows="2" class="field-input text-[10px] text-slate-500 resize-none leading-relaxed">${escapeHtml(STATE.invoice.terms)}</textarea>
+                <p class="text-[9px] font-bold uppercase text-slate-400">Terms & Conditions</p>
+                <p class="text-[10px] text-slate-500 leading-relaxed whitespace-pre-line">${escapeHtml(STATE.invoice.terms)}</p>
               </div>
             </div>
-
             <div class="col-span-5 space-y-1.5 text-xs">
-              ${getTotalsSummaryHTML(t)}
+              ${getCanvasTotalsHTML(t)}
             </div>
           </div>
         </div>
 
-        <!-- Footer -->
-        <div class="px-10 py-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400">
-          <span>Praveenkumar • Video Editor & Web Developer</span>
+        <div class="px-10 py-2.5 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400">
+          <span>Praveenkumar • Freelance Video Editor & Web Developer</span>
           <span>${escapeHtml(STATE.company.email)} • ${escapeHtml(STATE.company.phone)}</span>
         </div>
       `;
     }
 
-    /* ----------------------------------------------------------
-       TEMPLATE 2: MINIMAL CLEAN
-    ---------------------------------------------------------- */
+    /* --- TEMPLATE 2: MINIMAL CLEAN --- */
     function getMinimalTemplateHTML(t) {
       return `
         <div class="p-12 flex-1 flex flex-col justify-between font-sans">
           <div>
-            <!-- Minimal Header -->
             <div class="flex justify-between items-start pb-8 border-b border-slate-200">
               <div>
-                <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="field-input font-bold text-3xl text-slate-900 tracking-tight" placeholder="Your Name">
-                <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="field-input text-xs text-slate-500 font-medium tracking-wide uppercase mt-0.5" placeholder="Title">
+                <h2 class="font-bold text-3xl text-slate-900 tracking-tight">${escapeHtml(STATE.company.name)}</h2>
+                <p class="text-xs text-slate-500 font-medium tracking-wide uppercase mt-0.5">${escapeHtml(STATE.company.title)}</p>
               </div>
               <div class="text-right">
                 <p class="text-xs uppercase tracking-widest text-slate-400 font-bold">Invoice</p>
-                <input type="text" value="${escapeHtml(STATE.invoice.number)}" oninput="updateField('invoice.number', this.value)" class="field-input font-mono font-bold text-lg text-slate-900 text-right w-36">
+                <p class="font-mono font-bold text-lg text-slate-900">${escapeHtml(STATE.invoice.number)}</p>
                 <div class="mt-1">${getStatusBadgeHTML()}</div>
               </div>
             </div>
 
-            <!-- Metadata Row -->
             <div class="grid grid-cols-3 gap-6 py-6 border-b border-slate-200 text-xs">
               <div>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">From</p>
                 <p class="font-bold text-slate-800">${escapeHtml(STATE.company.name)}</p>
-                <input type="text" value="${escapeHtml(STATE.company.email)}" oninput="updateField('company.email', this.value)" class="field-input text-slate-500 text-[11px]">
-                <input type="text" value="${escapeHtml(STATE.company.phone)}" oninput="updateField('company.phone', this.value)" class="field-input text-slate-500 text-[11px]">
+                <p class="text-slate-500 text-[11px]">${escapeHtml(STATE.company.email)}</p>
+                <p class="text-slate-500 text-[11px]">${escapeHtml(STATE.company.phone)}</p>
               </div>
               <div>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Billed To</p>
-                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="field-input font-bold text-slate-800">
-                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="field-input text-slate-500 text-[11px]">
-                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="field-input text-slate-500 text-[11px]">
+                <p class="font-bold text-slate-800">${escapeHtml(STATE.client.name)}</p>
+                <p class="text-slate-500 text-[11px]">${escapeHtml(STATE.client.company)}</p>
+                <p class="text-slate-500 text-[11px]">${escapeHtml(STATE.client.address)}</p>
               </div>
               <div class="space-y-1">
-                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Invoice Details</p>
-                <div class="flex justify-between"><span class="text-slate-400">Date:</span> <input type="date" value="${STATE.invoice.date}" oninput="updateField('invoice.date', this.value)" class="field-input text-right text-slate-700 w-28"></div>
-                <div class="flex justify-between"><span class="text-slate-400">Due Date:</span> <input type="date" value="${STATE.invoice.dueDate}" oninput="updateField('invoice.dueDate', this.value)" class="field-input font-semibold text-right text-slate-800 w-28"></div>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Details</p>
+                <div class="flex justify-between"><span class="text-slate-400">Date:</span> <strong>${STATE.invoice.date}</strong></div>
+                <div class="flex justify-between"><span class="text-slate-400">Due:</span> <strong>${STATE.invoice.dueDate}</strong></div>
               </div>
             </div>
 
-            <!-- Line Items Table -->
             <div class="mt-6">
               <table class="w-full text-left text-xs">
                 <thead>
@@ -716,33 +1220,26 @@
                     <th class="py-2 w-[52%]">Description</th>
                     <th class="py-2 text-right w-[12%]">Qty</th>
                     <th class="py-2 text-right w-[16%]">Rate (${STATE.currency})</th>
-                    <th class="py-2 text-right w-[16%]">Total (${STATE.currency})</th>
-                    <th class="py-2 text-center w-[4%] no-print"></th>
+                    <th class="py-2 text-right w-[20%]">Total (${STATE.currency})</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  ${getItemsTableRowsHTML()}
+                  ${getTableRowsCanvasHTML()}
                 </tbody>
               </table>
-              <div class="mt-2 no-print add-row-container">
-                <button onclick="addNewLineItem()" class="text-xs font-semibold px-2 py-1 text-slate-600 hover:text-slate-900 flex items-center gap-1">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add item
-                </button>
-              </div>
             </div>
           </div>
 
-          <!-- Minimal Bottom: UPI & Totals -->
           <div class="pt-6 border-t border-slate-200 grid grid-cols-12 gap-8 items-end">
             <div class="col-span-6 space-y-3">
-              ${getUpiCardHTML(true)}
+              ${getCanvasUpiCardHTML()}
               <div class="text-[10px] text-slate-500 leading-relaxed">
                 <p class="font-bold text-slate-700 uppercase tracking-wider text-[9px]">Notes:</p>
-                <textarea oninput="updateField('invoice.notes', this.value)" rows="2" class="field-input text-[10px] text-slate-500 resize-none">${escapeHtml(STATE.invoice.notes)}</textarea>
+                <p>${escapeHtml(STATE.invoice.notes)}</p>
               </div>
             </div>
             <div class="col-span-6 space-y-1.5 text-xs">
-              ${getTotalsSummaryHTML(t)}
+              ${getCanvasTotalsHTML(t)}
             </div>
           </div>
         </div>
@@ -753,24 +1250,17 @@
       `;
     }
 
-    /* ----------------------------------------------------------
-       TEMPLATE 3: CREATIVE STUDIO (BOLD)
-    ---------------------------------------------------------- */
+    /* --- TEMPLATE 3: CREATIVE STUDIO --- */
     function getCreativeTemplateHTML(t) {
       return `
         <div class="flex-1 flex flex-col justify-between font-sans">
           <div>
-            <!-- Vibrant Header Banner -->
             <div class="p-8 text-white flex justify-between items-start relative overflow-hidden" style="background-color: ${STATE.accent};">
               <div class="relative z-10 space-y-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest bg-white/20 text-white backdrop-blur-sm">Creative Studio & Code</span>
-                <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="field-input font-black text-3xl text-white tracking-tight leading-tight" placeholder="Name">
-                <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="field-input text-xs font-semibold uppercase tracking-wider text-white/90" placeholder="Title">
-                <div class="flex gap-4 text-[11px] text-white/80 pt-1">
-                  <span>${escapeHtml(STATE.company.email)}</span>
-                  <span>•</span>
-                  <span>${escapeHtml(STATE.company.phone)}</span>
-                </div>
+                <span class="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-widest bg-white/20 text-white backdrop-blur-sm">Creative Studio & Web Dev</span>
+                <h2 class="font-black text-3xl text-white tracking-tight leading-tight">${escapeHtml(STATE.company.name)}</h2>
+                <p class="text-xs font-semibold uppercase tracking-wider text-white/90">${escapeHtml(STATE.company.title)}</p>
+                <p class="text-[11px] text-white/80 pt-0.5">${escapeHtml(STATE.company.email)} • ${escapeHtml(STATE.company.phone)}</p>
               </div>
 
               <div class="relative z-10 text-right space-y-2">
@@ -778,26 +1268,24 @@
                   ${escapeHtml(STATE.invoice.number)}
                 </div>
                 <div>${getStatusBadgeHTML(true)}</div>
-                <div class="text-[11px] text-white/90 space-y-0.5">
-                  <p>Issued: <input type="date" value="${STATE.invoice.date}" oninput="updateField('invoice.date', this.value)" class="field-input text-white text-right w-24"></p>
-                  <p>Due: <input type="date" value="${STATE.invoice.dueDate}" oninput="updateField('invoice.dueDate', this.value)" class="field-input text-white font-bold text-right w-24"></p>
+                <div class="text-[11px] text-white/90">
+                  <p>Issued: <strong>${STATE.invoice.date}</strong></p>
+                  <p>Due: <strong>${STATE.invoice.dueDate}</strong></p>
                 </div>
               </div>
             </div>
 
-            <!-- Client & Project Info Banner -->
-            <div class="px-8 py-5 bg-slate-100/90 border-b border-slate-200 grid grid-cols-2 gap-6 text-xs">
+            <div class="px-8 py-4 bg-slate-100 border-b border-slate-200 grid grid-cols-2 gap-6 text-xs">
               <div>
-                <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-1">Client Authorization</p>
-                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="field-input font-bold text-slate-900 text-sm">
-                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="field-input text-slate-600 text-[11px]">
-                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="field-input text-slate-500 text-[10px]">
+                <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-0.5">Client Recipient</p>
+                <p class="font-bold text-slate-900 text-sm">${escapeHtml(STATE.client.name)}</p>
+                <p class="text-slate-600 text-[11px]">${escapeHtml(STATE.client.company)}</p>
+                <p class="text-slate-500 text-[10px]">${escapeHtml(STATE.client.address)}</p>
               </div>
               <div class="text-right flex flex-col justify-between">
                 <div>
-                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-1">Production Project</p>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-0.5">Service Engagement</p>
                   <p class="font-bold text-slate-900 text-xs">4K Video Mastering & Web Deployment</p>
-                  <p class="text-slate-500 text-[11px]">Status: Active Sprint Handover</p>
                 </div>
                 <div class="text-slate-600 text-[11px]">
                   Direct UPI Pay: <span class="font-mono font-bold text-slate-900">${escapeHtml(STATE.invoice.upiId)}</span>
@@ -805,74 +1293,62 @@
               </div>
             </div>
 
-            <!-- Table -->
             <div class="px-8 mt-5">
               <table class="w-full text-left text-xs">
                 <thead>
-                  <tr class="bg-slate-900 text-white font-bold uppercase text-[9px] tracking-wider rounded-t-lg">
+                  <tr class="bg-slate-900 text-white font-bold uppercase text-[9px] tracking-wider">
                     <th class="py-2.5 px-3 rounded-l-lg w-[52%]">Milestone & Deliverable</th>
                     <th class="py-2.5 px-2 text-right w-[12%]">Qty</th>
                     <th class="py-2.5 px-2 text-right w-[16%]">Rate (${STATE.currency})</th>
-                    <th class="py-2.5 px-3 text-right w-[16%]">Total (${STATE.currency})</th>
-                    <th class="py-2.5 px-1 text-center rounded-r-lg w-[4%] no-print"></th>
+                    <th class="py-2.5 px-3 text-right rounded-r-lg w-[20%]">Total (${STATE.currency})</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                  ${getItemsTableRowsHTML()}
+                  ${getTableRowsCanvasHTML()}
                 </tbody>
               </table>
-              <div class="mt-2 no-print add-row-container">
-                <button onclick="addNewLineItem()" class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center gap-1 transition-colors">
-                  <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Milestone
-                </button>
-              </div>
             </div>
           </div>
 
-          <!-- Bottom Summary & UPI -->
           <div class="p-8 pt-4 border-t border-slate-200 grid grid-cols-12 gap-6 items-end">
             <div class="col-span-7 space-y-3">
-              ${getUpiCardHTML()}
+              ${getCanvasUpiCardHTML()}
               <div>
                 <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Terms of Service</p>
-                <textarea oninput="updateField('invoice.terms', this.value)" rows="2" class="field-input text-[10px] text-slate-500 resize-none">${escapeHtml(STATE.invoice.terms)}</textarea>
+                <p class="text-[10px] text-slate-500 whitespace-pre-line leading-relaxed">${escapeHtml(STATE.invoice.terms)}</p>
               </div>
             </div>
             <div class="col-span-5 space-y-1.5 text-xs">
-              ${getTotalsSummaryHTML(t)}
+              ${getCanvasTotalsHTML(t)}
             </div>
           </div>
         </div>
 
-        <div class="px-8 py-2.5 text-white flex justify-between items-center text-[10px]" style="background-color: ${STATE.accent};">
-          <span>Praveenkumar • Freelance Media & Web Studio</span>
-          <span>Made for Excellence</span>
+        <div class="px-8 py-2 text-white flex justify-between items-center text-[10px]" style="background-color: ${STATE.accent};">
+          <span>Praveenkumar • Creative Engineering & Media</span>
+          <span>Payment via UPI: ${escapeHtml(STATE.invoice.upiId)}</span>
         </div>
       `;
     }
 
-    /* ----------------------------------------------------------
-       TEMPLATE 4: CORPORATE / EXECUTIVE
-    ---------------------------------------------------------- */
+    /* --- TEMPLATE 4: CORPORATE EXEC --- */
     function getCorporateTemplateHTML(t) {
       return `
         <div class="p-10 flex-1 flex flex-col justify-between font-serif">
           <div>
-            <!-- Formal Top Border & Header -->
             <div class="border-t-4 border-b-2 py-4 mb-4" style="border-color: ${STATE.accent};">
               <div class="flex justify-between items-center font-sans">
                 <div>
-                  <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="field-input font-cinzel font-bold text-2xl text-slate-900 tracking-wider uppercase">
-                  <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="field-input font-sans text-xs tracking-widest text-slate-600 uppercase">
+                  <h2 class="font-cinzel font-bold text-2xl text-slate-900 tracking-wider uppercase">${escapeHtml(STATE.company.name)}</h2>
+                  <p class="text-xs tracking-widest text-slate-600 uppercase font-sans">${escapeHtml(STATE.company.title)}</p>
                 </div>
                 <div class="text-right">
-                  <h2 class="font-cinzel font-bold text-2xl text-slate-900 tracking-wider">TAX INVOICE</h2>
-                  <input type="text" value="${escapeHtml(STATE.invoice.number)}" oninput="updateField('invoice.number', this.value)" class="field-input font-mono font-bold text-slate-700 text-right text-xs">
+                  <h3 class="font-cinzel font-bold text-2xl text-slate-900 tracking-wider">TAX INVOICE</h3>
+                  <p class="font-mono font-bold text-slate-700 text-xs">${escapeHtml(STATE.invoice.number)}</p>
                 </div>
               </div>
             </div>
 
-            <!-- Corporate Info Grid -->
             <div class="grid grid-cols-2 gap-8 text-xs font-sans pb-4 border-b border-slate-200">
               <div class="space-y-1">
                 <p class="font-bold text-slate-900 uppercase text-[10px] tracking-wider">Consultant / Service Provider:</p>
@@ -882,9 +1358,9 @@
               </div>
               <div class="space-y-1 text-right">
                 <p class="font-bold text-slate-900 uppercase text-[10px] tracking-wider">Client Recipient:</p>
-                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="field-input font-semibold text-slate-800 text-right">
-                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="field-input text-slate-600 text-right">
-                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="field-input text-slate-500 text-right">
+                <p class="font-semibold text-slate-800">${escapeHtml(STATE.client.name)}</p>
+                <p class="text-slate-600">${escapeHtml(STATE.client.company)}</p>
+                <p class="text-slate-500">${escapeHtml(STATE.client.address)}</p>
                 <div class="pt-1 flex justify-end gap-3 text-[11px]">
                   <span>Date: <strong>${STATE.invoice.date}</strong></span>
                   <span>Due: <strong>${STATE.invoice.dueDate}</strong></span>
@@ -892,7 +1368,6 @@
               </div>
             </div>
 
-            <!-- Items Table -->
             <div class="mt-4 font-sans">
               <table class="w-full text-left text-xs">
                 <thead>
@@ -900,36 +1375,29 @@
                     <th class="py-2.5 px-2 w-[52%]">Services & Deliverables</th>
                     <th class="py-2.5 px-2 text-right w-[12%]">Units</th>
                     <th class="py-2.5 px-2 text-right w-[16%]">Unit Price (${STATE.currency})</th>
-                    <th class="py-2.5 px-2 text-right w-[16%]">Amount (${STATE.currency})</th>
-                    <th class="py-2.5 px-1 text-center w-[4%] no-print"></th>
+                    <th class="py-2.5 px-2 text-right w-[20%]">Amount (${STATE.currency})</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200">
-                  ${getItemsTableRowsHTML()}
+                  ${getTableRowsCanvasHTML()}
                 </tbody>
               </table>
-              <div class="mt-2 no-print add-row-container">
-                <button onclick="addNewLineItem()" class="text-xs font-semibold px-2 py-1 text-slate-700 hover:text-slate-900 flex items-center gap-1 border border-slate-300 rounded">
-                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Line Item
-                </button>
-              </div>
             </div>
           </div>
 
-          <!-- Executive Totals & UPI -->
           <div class="pt-4 border-t-2 border-slate-800 grid grid-cols-12 gap-6 items-end font-sans">
             <div class="col-span-6 space-y-3">
-              ${getUpiCardHTML()}
+              ${getCanvasUpiCardHTML()}
               <div>
-                <p class="text-[9px] font-bold uppercase text-slate-500">Authorized Settlement Terms</p>
-                <textarea oninput="updateField('invoice.terms', this.value)" rows="2" class="field-input text-[10px] text-slate-600 resize-none">${escapeHtml(STATE.invoice.terms)}</textarea>
+                <p class="text-[9px] font-bold uppercase text-slate-500">Authorized Terms</p>
+                <p class="text-[10px] text-slate-600 leading-relaxed whitespace-pre-line">${escapeHtml(STATE.invoice.terms)}</p>
               </div>
             </div>
             <div class="col-span-6 space-y-1.5 text-xs">
-              ${getTotalsSummaryHTML(t)}
-              <div class="pt-4 flex justify-between items-end border-t border-slate-300">
+              ${getCanvasTotalsHTML(t)}
+              <div class="pt-3 flex justify-between items-end border-t border-slate-300">
                 <div class="text-left">
-                  <div class="w-36 border-b border-slate-400 mb-1"></div>
+                  <div class="w-32 border-b border-slate-400 mb-1"></div>
                   <p class="text-[9px] uppercase tracking-wider text-slate-500">Authorized Signature</p>
                 </div>
                 <div>${getStatusBadgeHTML()}</div>
@@ -938,53 +1406,45 @@
           </div>
         </div>
 
-        <div class="px-10 py-3 bg-slate-100 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 font-sans">
-          <span>Official Invoice • Praveenkumar Consulting</span>
-          <span>Payment Reference: ${escapeHtml(STATE.invoice.upiId)}</span>
+        <div class="px-10 py-2.5 bg-slate-100 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 font-sans">
+          <span>Official Tax Invoice • Praveenkumar Freelance Operations</span>
+          <span>UPI: ${escapeHtml(STATE.invoice.upiId)}</span>
         </div>
       `;
     }
 
-    /* ----------------------------------------------------------
-       TEMPLATE 5: SPLIT SIDEBAR (DARK ACCENT COLUMN)
-    ---------------------------------------------------------- */
+    /* --- TEMPLATE 5: SPLIT SIDEBAR --- */
     function getSplitSidebarTemplateHTML(t) {
       return `
         <div class="flex-1 flex flex-row h-full">
-          <!-- LEFT DARK ACCENT COLUMN -->
-          <div class="w-[32%] p-6 text-white flex flex-col justify-between relative" style="background-color: ${STATE.accent};">
+          <!-- Left Column -->
+          <div class="w-[33%] p-6 text-white flex flex-col justify-between" style="background-color: ${STATE.accent};">
             <div class="space-y-6">
-              <!-- Avatar & Brand -->
               <div>
                 <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold text-xl mb-3 shadow">
                   PK
                 </div>
-                <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="dark-field-input font-bold text-xl tracking-tight leading-none" placeholder="Your Name">
-                <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="dark-field-input text-xs text-white/80 font-medium uppercase tracking-wider mt-1" placeholder="Title">
+                <h2 class="font-bold text-xl tracking-tight leading-tight">${escapeHtml(STATE.company.name)}</h2>
+                <p class="text-xs text-white/80 font-medium uppercase tracking-wider mt-1">${escapeHtml(STATE.company.title)}</p>
               </div>
 
-              <!-- From Details -->
-              <div class="text-[11px] text-white/80 space-y-2 pt-2 border-t border-white/20">
-                <p class="text-[9px] uppercase tracking-widest font-bold text-white/60">Contact Info</p>
-                <div class="space-y-1">
-                  <input type="text" value="${escapeHtml(STATE.company.email)}" oninput="updateField('company.email', this.value)" class="dark-field-input text-[11px]">
-                  <input type="text" value="${escapeHtml(STATE.company.phone)}" oninput="updateField('company.phone', this.value)" class="dark-field-input text-[11px]">
-                  <input type="text" value="${escapeHtml(STATE.company.location)}" oninput="updateField('company.location', this.value)" class="dark-field-input text-[11px]">
-                </div>
+              <div class="text-[11px] text-white/80 space-y-1.5 pt-2 border-t border-white/20">
+                <p class="text-[9px] uppercase tracking-widest font-bold text-white/60">Contact</p>
+                <p>${escapeHtml(STATE.company.email)}</p>
+                <p>${escapeHtml(STATE.company.phone)}</p>
+                <p>${escapeHtml(STATE.company.location)}</p>
               </div>
 
-              <!-- Client Details -->
               <div class="text-[11px] text-white/80 space-y-1 pt-2 border-t border-white/20">
                 <p class="text-[9px] uppercase tracking-widest font-bold text-white/60">Billed To</p>
-                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="dark-field-input font-bold text-white text-xs">
-                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="dark-field-input text-[11px]">
-                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="dark-field-input text-[10px]">
+                <p class="font-bold text-white">${escapeHtml(STATE.client.name)}</p>
+                <p>${escapeHtml(STATE.client.company)}</p>
+                <p class="text-[10px]">${escapeHtml(STATE.client.address)}</p>
               </div>
 
-              <!-- UPI Scan Box Inside Column -->
               <div class="pt-2 border-t border-white/20">
                 <p class="text-[9px] uppercase tracking-widest font-bold text-white/60 mb-2">Scan & Pay (UPI)</p>
-                <div class="bg-white p-2.5 rounded-xl shadow-md inline-block">
+                <div class="bg-white p-2.5 rounded-xl shadow inline-block">
                   <div id="qrcode" class="w-[84px] h-[84px]"></div>
                 </div>
                 <div class="mt-2 text-[10px] space-y-0.5">
@@ -994,56 +1454,46 @@
               </div>
             </div>
 
-            <!-- Column Footer -->
-            <div class="pt-4 border-t border-white/20 text-[9px] text-white/60">
+            <div class="pt-3 border-t border-white/20 text-[9px] text-white/60">
               Tax Invoice Document • 2026
             </div>
           </div>
 
-          <!-- RIGHT MAIN CONTENT COLUMN -->
-          <div class="w-[68%] p-8 flex flex-col justify-between bg-white">
+          <!-- Right Column -->
+          <div class="w-[67%] p-8 flex flex-col justify-between bg-white">
             <div>
-              <!-- Invoice Top Meta -->
               <div class="flex justify-between items-start pb-4 border-b border-slate-200">
                 <div>
                   <h2 class="font-extrabold text-2xl text-slate-900 tracking-tight">INVOICE</h2>
                   <div class="mt-1">${getStatusBadgeHTML()}</div>
                 </div>
                 <div class="text-right text-xs space-y-1">
-                  <div><span class="text-slate-400">Invoice No:</span> <input type="text" value="${escapeHtml(STATE.invoice.number)}" oninput="updateField('invoice.number', this.value)" class="field-input font-mono font-bold text-slate-800 text-right w-28"></div>
-                  <div><span class="text-slate-400">Date:</span> <input type="date" value="${STATE.invoice.date}" oninput="updateField('invoice.date', this.value)" class="field-input text-slate-700 text-right w-28"></div>
-                  <div><span class="text-slate-400">Due Date:</span> <input type="date" value="${STATE.invoice.dueDate}" oninput="updateField('invoice.dueDate', this.value)" class="field-input font-bold text-slate-900 text-right w-28"></div>
+                  <div><span class="text-slate-400">Invoice:</span> <strong class="font-mono">${escapeHtml(STATE.invoice.number)}</strong></div>
+                  <div><span class="text-slate-400">Date:</span> <strong>${STATE.invoice.date}</strong></div>
+                  <div><span class="text-slate-400">Due:</span> <strong>${STATE.invoice.dueDate}</strong></div>
                 </div>
               </div>
 
-              <!-- Items Table -->
               <div class="mt-4">
                 <table class="w-full text-left text-xs">
                   <thead>
                     <tr class="border-b-2 border-slate-200 text-slate-800 font-bold uppercase text-[9px]">
-                      <th class="py-2.5 px-2 w-[48%]">Description</th>
-                      <th class="py-2.5 px-2 text-right w-[12%]">Qty</th>
-                      <th class="py-2.5 px-2 text-right w-[18%]">Rate (${STATE.currency})</th>
-                      <th class="py-2.5 px-2 text-right w-[18%]">Total (${STATE.currency})</th>
-                      <th class="py-2.5 px-1 text-center w-[4%] no-print"></th>
+                      <th class="py-2 px-2 w-[48%]">Description</th>
+                      <th class="py-2 px-2 text-right w-[12%]">Qty</th>
+                      <th class="py-2 px-2 text-right w-[18%]">Rate (${STATE.currency})</th>
+                      <th class="py-2 px-2 text-right w-[22%]">Total (${STATE.currency})</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-100">
-                    ${getItemsTableRowsHTML()}
+                    ${getTableRowsCanvasHTML()}
                   </tbody>
                 </table>
-                <div class="mt-2 no-print add-row-container">
-                  <button onclick="addNewLineItem()" class="text-xs font-semibold px-2 py-1 text-indigo-600 hover:bg-indigo-50 rounded flex items-center gap-1">
-                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add item
-                  </button>
-                </div>
               </div>
             </div>
 
-            <!-- Right Column Financial Summary -->
             <div class="pt-4 border-t border-slate-200 space-y-3">
               <div class="space-y-1.5 text-xs">
-                ${getTotalsSummaryHTML(t)}
+                ${getCanvasTotalsHTML(t)}
               </div>
               <div class="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex justify-between items-center">
                 <span>Terms: Net 10 Days</span>
@@ -1055,80 +1505,67 @@
       `;
     }
 
-    /* ==========================================================
-       SUB-COMPONENTS (TABLE ROWS, TOTALS, UPI, BADGES)
-    ========================================================== */
-    function getItemsTableRowsHTML() {
-      return STATE.items.map((item, index) => {
+    /* --- CANVAS SUB-COMPONENTS --- */
+    function getTableRowsCanvasHTML() {
+      return STATE.items.map((item) => {
         const rowTotal = Number(item.qty || 0) * Number(item.rate || 0);
         return `
-          <tr class="group hover:bg-slate-50/60 transition-colors">
+          <tr class="hover:bg-slate-50/70">
             <td class="py-2 px-2 align-top">
-              <input type="text" value="${escapeHtml(item.name)}" oninput="updateItem(${index}, 'name', this.value)" class="field-input font-semibold text-slate-800 text-xs mb-0.5" placeholder="Item name">
-              <input type="text" value="${escapeHtml(item.desc || '')}" oninput="updateItem(${index}, 'desc', this.value)" class="field-input text-slate-500 text-[10px]" placeholder="Detailed description">
+              <p class="font-bold text-slate-800 text-xs">${escapeHtml(item.name)}</p>
+              ${item.desc ? `<p class="text-slate-500 text-[10px] leading-tight mt-0.5">${escapeHtml(item.desc)}</p>` : ''}
             </td>
-            <td class="py-2 px-2 text-right align-top">
-              <input type="number" min="1" step="any" value="${item.qty}" oninput="updateItem(${index}, 'qty', parseFloat(this.value) || 0)" class="field-input text-right w-12 font-medium text-slate-700">
-            </td>
-            <td class="py-2 px-2 text-right align-top">
-              <input type="number" min="0" step="any" value="${item.rate}" oninput="updateItem(${index}, 'rate', parseFloat(this.value) || 0)" class="field-input text-right w-20 font-medium text-slate-700">
-            </td>
-            <td class="py-2 px-2 text-right align-top font-bold text-slate-900">
-              ${formatMoney(rowTotal)}
-            </td>
-            <td class="py-2 px-1 text-center align-top no-print">
-              <button onclick="removeLineItem(${index})" title="Remove item" class="text-slate-300 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </td>
+            <td class="py-2 px-2 text-right align-top font-medium text-slate-700">${item.qty}</td>
+            <td class="py-2 px-2 text-right align-top font-medium text-slate-700">${formatNumber(item.rate)}</td>
+            <td class="py-2 px-2 text-right align-top font-bold text-slate-900">${formatNumber(rowTotal)}</td>
           </tr>
         `;
       }).join('');
     }
 
-    function getTotalsSummaryHTML(t) {
+    function getCanvasTotalsHTML(t) {
       return `
         <div class="flex justify-between py-0.5 text-slate-600">
           <span>Subtotal:</span>
-          <span class="font-medium text-slate-800 font-mono">${STATE.currency}${formatMoney(t.subtotal)}</span>
+          <span class="font-medium text-slate-800 font-mono">${STATE.currency}${formatNumber(t.subtotal)}</span>
         </div>
         ${t.discountVal > 0 ? `
           <div class="flex justify-between py-0.5 text-slate-600">
             <span>Discount (${STATE.invoice.discount}${STATE.invoice.discountType === '%' ? '%' : ' flat'}):</span>
-            <span class="font-medium text-rose-600 font-mono">-${STATE.currency}${formatMoney(t.discountVal)}</span>
+            <span class="font-medium text-rose-600 font-mono">-${STATE.currency}${formatNumber(t.discountVal)}</span>
           </div>
         ` : ''}
         <div class="flex justify-between py-0.5 text-slate-600">
           <span>Tax / GST (${STATE.invoice.taxRate}%):</span>
-          <span class="font-medium text-slate-800 font-mono">${STATE.currency}${formatMoney(t.taxAmount)}</span>
+          <span class="font-medium text-slate-800 font-mono">${STATE.currency}${formatNumber(t.taxAmount)}</span>
         </div>
         <div class="flex justify-between py-1 border-t border-slate-200 text-slate-900 font-bold">
           <span>Grand Total:</span>
-          <span class="font-mono text-sm">${STATE.currency}${formatMoney(t.grandTotal)}</span>
+          <span class="font-mono text-sm">${STATE.currency}${formatNumber(t.grandTotal)}</span>
         </div>
         ${Number(STATE.invoice.paidAmount) > 0 ? `
           <div class="flex justify-between py-0.5 text-emerald-700 text-[11px]">
-            <span>Paid to Date:</span>
-            <span class="font-mono font-medium">-${STATE.currency}${formatMoney(STATE.invoice.paidAmount)}</span>
+            <span>Advance Deposit Paid:</span>
+            <span class="font-mono font-medium">-${STATE.currency}${formatNumber(STATE.invoice.paidAmount)}</span>
           </div>
         ` : ''}
-        <div class="p-2.5 rounded-lg text-white font-bold flex justify-between items-center shadow-sm" style="background-color: ${STATE.accent};">
+        <div class="p-2.5 rounded-xl text-white font-bold flex justify-between items-center shadow-sm" style="background-color: ${STATE.accent};">
           <span class="text-[10px] uppercase tracking-wider">Balance Due:</span>
-          <span class="text-base font-extrabold font-mono">${STATE.currency}${formatMoney(t.balanceDue)}</span>
+          <span class="text-base font-extrabold font-mono">${STATE.currency}${formatNumber(t.balanceDue)}</span>
         </div>
       `;
     }
 
-    function getUpiCardHTML(minimal = false) {
+    function getCanvasUpiCardHTML() {
       return `
         <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center gap-3">
-          <div class="bg-white p-1.5 rounded-lg border border-slate-200 flex-shrink-0 shadow-sm">
-            <div id="qrcode" class="w-[80px] h-[80px]"></div>
+          <div class="bg-white p-1.5 rounded-lg border border-slate-200 flex-shrink-0 shadow-sm cursor-pointer" onclick="openUpiModal()" title="Tap to expand QR">
+            <div id="qrcode" class="w-[76px] h-[76px]"></div>
           </div>
           <div class="space-y-1 text-xs">
             <div class="flex items-center gap-1.5">
               <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-emerald-600 text-white tracking-wider">UPI Instant Pay</span>
-              <button onclick="copyUpiId()" title="Copy UPI ID" class="text-slate-400 hover:text-slate-700 no-print"><i data-lucide="copy" class="w-3 h-3"></i></button>
+              <button onclick="copyUpiId()" class="text-slate-400 hover:text-slate-800 no-print" title="Copy UPI"><i data-lucide="copy" class="w-3 h-3"></i></button>
             </div>
             <p class="text-[10px] text-slate-500">Scan via GPay, PhonePe, Paytm, or BHIM.</p>
             <p class="text-[10px] font-mono font-bold text-slate-900 bg-slate-200/60 px-1.5 py-0.5 rounded select-all inline-block">${escapeHtml(STATE.invoice.upiId)}</p>
@@ -1149,30 +1586,38 @@
         colors = 'bg-white/20 text-white border-white/30 backdrop-blur-sm';
       }
 
-      return `<span class="px-2 py-0.5 rounded text-[9px] font-extrabold tracking-widest uppercase border ${colors}">${s}</span>`;
+      return `<span class="px-2 py-0.5 rounded text-[9px] font-extrabold tracking-widest uppercase border ${colors}">${s === 'PENDING' ? 'DUE' : s}</span>`;
     }
 
-    /* ==========================================================
-       QR CODE GENERATION
-    ========================================================== */
-    function generateUpiQrCode(amount) {
-      const qrContainers = document.querySelectorAll('#qrcode');
-      if (!qrContainers.length) return;
+    function updateCanvasField(path, val) {
+      const parts = path.split('.');
+      if (parts.length === 2) {
+        STATE[parts[0]][parts[1]] = val;
+      }
+    }
 
+    /* --------------------------------------------------------
+       UPI INTENT & QR CODE GENERATION
+    -------------------------------------------------------- */
+    function buildUpiIntentUri(amount) {
       const upiId = STATE.invoice.upiId || '8667536739-2@ybl';
       const payeeName = STATE.invoice.payeeName || 'Praveenkumar';
-      const safeAmount = (Number(amount) > 0 ? Number(amount) : 0).toFixed(2);
-      const invoiceNo = STATE.invoice.number || 'INV';
+      const amtStr = (Number(amount) > 0 ? Number(amount) : 0).toFixed(2);
+      const note = `Invoice ${STATE.invoice.number || 'Payment'}`;
 
-      // Standard UPI Intent Link
-      const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${safeAmount}&cu=INR&tn=${encodeURIComponent('Invoice ' + invoiceNo + ' Settlement')}`;
+      return `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${amtStr}&cu=INR&tn=${encodeURIComponent(note)}`;
+    }
 
+    function generateUpiQrCode(amount) {
+      const upiUri = buildUpiIntentUri(amount);
+      const qrContainers = document.querySelectorAll('#qrcode');
+      
       qrContainers.forEach(container => {
         container.innerHTML = '';
         new QRCode(container, {
           text: upiUri,
-          width: 80,
-          height: 80,
+          width: 76,
+          height: 76,
           colorDark: '#0f172a',
           colorLight: '#ffffff',
           correctLevel: QRCode.CorrectLevel.M
@@ -1180,166 +1625,12 @@
       });
     }
 
-    /* ==========================================================
-       USER INTERACTION HANDLERS
-    ========================================================= */
-    function switchTemplate(tplKey) {
-      STATE.template = tplKey;
-      document.querySelectorAll('.tpl-btn').forEach(btn => {
-        btn.className = 'tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white';
-      });
-      const activeBtn = document.getElementById(`tplBtn-${tplKey}`);
-      if (activeBtn) {
-        activeBtn.className = 'tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm';
-      }
-      renderInvoice();
-      showToast(`Switched to ${tplKey.toUpperCase()} template`);
-    }
-
-    function buildThemePalette() {
-      const palette = document.getElementById('themePalette');
-      palette.innerHTML = '';
-      THEME_PRESETS.forEach(item => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `w-5 h-5 rounded-full border-2 transition-transform hover:scale-110 ${STATE.accent === item.color ? 'border-white scale-110' : 'border-transparent'}`;
-        btn.style.backgroundColor = item.color;
-        btn.title = item.name;
-        btn.onclick = () => {
-          STATE.accent = item.color;
-          document.documentElement.style.setProperty('--accent', item.color);
-          buildThemePalette();
-          renderInvoice();
-          showToast(`Theme: ${item.name}`);
-        };
-        palette.appendChild(btn);
-      });
-    }
-
-    function setCurrency(sym) {
-      STATE.currency = sym;
-      document.querySelectorAll('.curr-selector-btn').forEach(b => {
-        if (b.getAttribute('data-curr') === sym) {
-          b.className = 'curr-selector-btn py-1.5 rounded border border-indigo-500 bg-indigo-500/20 text-indigo-300 font-bold';
-        } else {
-          b.className = 'curr-selector-btn py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-slate-300';
-        }
-      });
-      document.getElementById('sidebarCurrencySymbol').textContent = `${sym} Format`;
-      document.getElementById('paidSymbolPrefix').textContent = sym;
-      renderInvoice();
-      showToast(`Currency set to ${sym}`);
-    }
-
-    function setStatus(statusKey) {
-      STATE.status = statusKey;
-      document.querySelectorAll('.status-btn').forEach(btn => {
-        btn.className = 'status-btn py-1 rounded border border-slate-700 hover:bg-slate-700 text-slate-300';
-      });
-      const active = document.getElementById(`status-${statusKey.toLowerCase()}`);
-      if (active) {
-        active.className = `status-btn py-1 rounded border font-bold ${
-          statusKey === 'PAID' ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300' :
-          statusKey === 'PENDING' ? 'border-amber-500 bg-amber-500/20 text-amber-300' :
-          statusKey === 'OVERDUE' ? 'border-rose-500 bg-rose-500/20 text-rose-300' :
-          'border-slate-500 bg-slate-500/20 text-slate-300'
-        }`;
-      }
-      renderInvoice();
-      showToast(`Status: ${statusKey}`);
-    }
-
-    function setQuickGST(val) {
-      document.getElementById('ctrlTaxRate').value = val;
-      STATE.invoice.taxRate = val;
-      renderInvoice();
-      showToast(`Tax rate updated to ${val}% GST`);
-    }
-
-    function addNewLineItem() {
-      STATE.items.push({
-        id: Date.now(),
-        name: 'New Video / Web Milestone Deliverable',
-        desc: 'Scope handover, post-production revision cycle, and client sign-off.',
-        qty: 1,
-        rate: 5000
-      });
-      renderInvoice();
-      showToast('Line item added');
-    }
-
-    function removeLineItem(index) {
-      if (STATE.items.length <= 1) {
-        showToast('At least 1 line item is required');
-        return;
-      }
-      STATE.items.splice(index, 1);
-      renderInvoice();
-      showToast('Line item deleted');
-    }
-
-    function updateItem(index, key, val) {
-      if (STATE.items[index]) {
-        STATE.items[index][key] = val;
-        // Re-render totals without losing keyboard focus
-        silentTotalsRefresh();
-      }
-    }
-
-    function updateField(path, value) {
-      const parts = path.split('.');
-      if (parts.length === 2) {
-        STATE[parts[0]][parts[1]] = value;
-      }
-      silentTotalsRefresh();
-    }
-
-    function syncStateFromInputs() {
-      STATE.invoice.taxRate = parseFloat(document.getElementById('ctrlTaxRate').value) || 0;
-      STATE.invoice.discount = parseFloat(document.getElementById('ctrlDiscount').value) || 0;
-      STATE.invoice.discountType = document.getElementById('ctrlDiscountType').value;
-      STATE.invoice.paidAmount = parseFloat(document.getElementById('ctrlPaidAmount').value) || 0;
-      STATE.invoice.upiId = document.getElementById('ctrlUpiId').value.trim();
-      STATE.invoice.payeeName = document.getElementById('ctrlPayeeName').value.trim();
-      renderInvoice();
-    }
-
-    function updateSidebarInputs() {
-      document.getElementById('ctrlTaxRate').value = STATE.invoice.taxRate;
-      document.getElementById('ctrlDiscount').value = STATE.invoice.discount;
-      document.getElementById('ctrlDiscountType').value = STATE.invoice.discountType;
-      document.getElementById('ctrlPaidAmount').value = STATE.invoice.paidAmount;
-      document.getElementById('ctrlUpiId').value = STATE.invoice.upiId;
-      document.getElementById('ctrlPayeeName').value = STATE.invoice.payeeName;
-    }
-
-    function silentTotalsRefresh() {
-      const totals = calculateTotals();
-      generateUpiQrCode(totals.balanceDue > 0 ? totals.balanceDue : totals.grandTotal);
-    }
-
-    /* ==========================================================
-       ZOOM & PRINT
-    ========================================================== */
-    function adjustZoom(delta) {
-      STATE.zoom = Math.min(1.2, Math.max(0.4, Math.round((STATE.zoom + delta) * 100) / 100));
-      applyZoom();
-    }
-
-    function resetZoom() {
-      STATE.zoom = 0.85;
-      applyZoom();
-    }
-
-    function applyZoom() {
-      const scaler = document.getElementById('canvasScaler');
-      const text = document.getElementById('zoomLevelText');
-      if (scaler) scaler.style.transform = `scale(${STATE.zoom})`;
-      if (text) text.textContent = `${Math.round(STATE.zoom * 100)}%`;
-    }
-
-    function triggerPrintPDF() {
-      window.print();
+    function openUpiAppDirect() {
+      const totals = getTotals();
+      const amt = totals.balanceDue > 0 ? totals.balanceDue : totals.grandTotal;
+      const uri = buildUpiIntentUri(amt);
+      window.location.href = uri;
+      showToast('Opening installed UPI App...');
     }
 
     function copyUpiId() {
@@ -1347,52 +1638,165 @@
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(upi);
       } else {
-        const temp = document.createElement('textarea');
-        temp.value = upi;
-        document.body.appendChild(temp);
-        temp.select();
+        const t = document.createElement('textarea');
+        t.value = upi;
+        document.body.appendChild(t);
+        t.select();
         document.execCommand('copy');
-        document.body.removeChild(temp);
+        document.body.removeChild(t);
       }
       showToast(`Copied UPI ID: ${upi}`);
     }
 
-    /* ==========================================================
-       LOCALSTORAGE PERSISTENCE
-    ========================================================== */
-    function saveToLocalStorage() {
-      try {
-        localStorage.setItem('pk_invoice_state', JSON.stringify(STATE));
-        showToast('Saved state to browser storage!');
-      } catch (e) {
-        showToast('Could not save to storage');
+    /* --------------------------------------------------------
+       TEMPLATE SELECTION MODAL LOGIC
+    -------------------------------------------------------- */
+    function switchTemplate(tplKey) {
+      STATE.template = tplKey;
+
+      // Update Desktop tabs
+      document.querySelectorAll('.dt-tpl-btn').forEach(btn => {
+        btn.className = 'dt-tpl-btn px-2.5 py-1 rounded-md font-semibold transition-all text-slate-300 hover:bg-slate-800 hover:text-white';
+      });
+      const dtActive = document.getElementById(`dtBtn-${tplKey}`);
+      if (dtActive) {
+        dtActive.className = 'dt-tpl-btn px-2.5 py-1 rounded-md font-semibold transition-all bg-indigo-600 text-white shadow';
+      }
+
+      // Update Mobile Pills
+      document.querySelectorAll('.mob-pill').forEach(pill => {
+        pill.className = 'mob-pill flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-300';
+      });
+      const mobActive = document.getElementById(`mobPill-${tplKey}`);
+      if (mobActive) {
+        mobActive.className = 'mob-pill flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white';
+      }
+
+      renderInvoice();
+      showToast(`Template: ${tplKey.toUpperCase()}`);
+    }
+
+    function openTemplateModal() {
+      const modal = document.getElementById('templateModal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+    function closeTemplateModal() {
+      const modal = document.getElementById('templateModal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+    }
+    function selectAndCloseTemplate(tplKey) {
+      switchTemplate(tplKey);
+      closeTemplateModal();
+    }
+
+    /* --------------------------------------------------------
+       THEME MODAL LOGIC
+    -------------------------------------------------------- */
+    function buildThemeOptions() {
+      const list = document.getElementById('themeModalList');
+      if (!list) return;
+      list.innerHTML = THEME_OPTIONS.map(opt => `
+        <button type="button" onclick="selectTheme('${opt.color}', '${opt.name}')" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 flex flex-col items-center gap-2">
+          <span class="w-8 h-8 rounded-full shadow" style="background-color: ${opt.color};"></span>
+          <span class="text-xs font-bold text-slate-200">${opt.name}</span>
+        </button>
+      `).join('');
+    }
+
+    function openThemeModal() {
+      document.getElementById('themeModal').classList.remove('opacity-0', 'pointer-events-none');
+    }
+    function closeThemeModal() {
+      document.getElementById('themeModal').classList.add('opacity-0', 'pointer-events-none');
+    }
+    function selectTheme(color, name) {
+      STATE.accent = color;
+      document.documentElement.style.setProperty('--accent', color);
+      document.getElementById('activeThemeDot').style.backgroundColor = color;
+      renderInvoice();
+      closeThemeModal();
+      showToast(`Accent theme: ${name}`);
+    }
+
+    /* --------------------------------------------------------
+       UPI MODAL (LARGE QR POPUP)
+    -------------------------------------------------------- */
+    function openUpiModal() {
+      const modal = document.getElementById('upiModal');
+      const container = document.getElementById('modalQrCodeContainer');
+      const totals = getTotals();
+      const amt = totals.balanceDue > 0 ? totals.balanceDue : totals.grandTotal;
+
+      document.getElementById('modalQrAmountDisplay').textContent = `${STATE.currency}${formatNumber(amt)}`;
+      document.getElementById('modalQrUpiId').textContent = STATE.invoice.upiId;
+
+      container.innerHTML = '';
+      new QRCode(container, {
+        text: buildUpiIntentUri(amt),
+        width: 180,
+        height: 180,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      lucide.createIcons();
+    }
+
+    function closeUpiModal() {
+      document.getElementById('upiModal').classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    /* --------------------------------------------------------
+       PRINT / PDF TRIGGER
+    -------------------------------------------------------- */
+    function triggerPrintPDF() {
+      // If user is in edit mode on mobile, automatically bring up the A4 preview first
+      if (window.innerWidth < 1024 && STATE.mobileView === 'edit') {
+        setMobileView('preview');
+        setTimeout(() => {
+          window.print();
+        }, 200);
+      } else {
+        window.print();
       }
     }
 
-    function loadFromLocalStorage() {
+    /* --------------------------------------------------------
+       PERSISTENCE & UTILITIES
+    -------------------------------------------------------- */
+    function saveState() {
       try {
-        const saved = localStorage.getItem('pk_invoice_state');
-        if (saved) {
-          const parsed = JSON.parse(saved);
+        localStorage.setItem('pk_invoice_state_v2', JSON.stringify(STATE));
+        showToast('Saved state to storage');
+      } catch(e) {}
+    }
+
+    function loadSavedState() {
+      try {
+        const s = localStorage.getItem('pk_invoice_state_v2');
+        if (s) {
+          const parsed = JSON.parse(s);
           Object.assign(STATE, parsed);
         }
-      } catch (e) {}
+      } catch(e) {}
     }
 
     function resetDefaults() {
-      localStorage.removeItem('pk_invoice_state');
+      localStorage.removeItem('pk_invoice_state_v2');
       location.reload();
     }
 
-    function showToast(msg) {
-      const toast = document.getElementById('toastMessage');
-      const text = document.getElementById('toastText');
-      text.textContent = msg;
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
+    function showToast(text) {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastNotificationText');
+      msg.textContent = text;
+      toast.classList.remove('opacity-0', 'translate-y-[-100px]', 'sm:translate-y-20');
+      toast.classList.add('opacity-100', 'translate-y-0');
       setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-[-100px]', 'sm:translate-y-20');
       }, 2500);
     }
 
