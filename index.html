@@ -1,1017 +1,1410 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Video Editor Billing & Tax Invoice Generator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Studio - Praveenkumar | Video Editor & Web Developer</title>
   
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Google Fonts: Inter, Montserrat, Space Mono -->
+  <!-- Google Fonts: Inter, Plus Jakarta Sans, Playfair Display, Space Grotesk, JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   
-  <!-- QRCode.js CDN for dynamic UPI QR generation -->
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <!-- html2pdf.js CDN for 1-Click exact PDF Download -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            serif: ['Playfair Display', 'serif'],
+            cinzel: ['Cinzel', 'serif'],
+            space: ['Space Grotesk', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    .heading-font {
-      font-family: 'Montserrat', sans-serif;
-    }
-    .mono-num {
-      font-family: 'Space Mono', monospace;
+    :root {
+      --accent: #4f46e5;
+      --accent-light: #eef2ff;
+      --accent-dark: #3730a3;
+      --accent-ring: rgba(79, 70, 229, 0.25);
     }
 
-    /* Fixed A4 Sheet Geometry for Live Screen View */
+    /* Standard A4 Paper Specs */
     .a4-sheet {
-      width: 100%;
-      max-width: 210mm;
+      width: 210mm;
       min-height: 297mm;
-      margin: 0 auto;
+      height: 297mm;
+      max-height: 297mm;
+      position: relative;
+      background: #ffffff;
       box-sizing: border-box;
+      margin: 0 auto;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
-    /* Print styling: Strictly locked to standard A4 sheet */
-    @page {
-      size: A4 portrait;
-      margin: 0;
+    /* Subtle editable inputs for on-canvas direct typing */
+    .field-input {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 1px 4px;
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+    .field-input:hover {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+    .field-input:focus {
+      background: #ffffff;
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 2px var(--accent-ring);
     }
 
+    /* Split sidebar input styling */
+    .dark-field-input {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 1px 4px;
+      color: inherit;
+      width: 100%;
+    }
+    .dark-field-input:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .dark-field-input:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #ffffff;
+      outline: none;
+    }
+
+    /* Print Configuration */
     @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0mm !important;
+      }
       html, body {
-        background: #ffffff !important;
-        color: #0f172a !important;
+        width: 210mm !important;
+        height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: #ffffff !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
       .no-print {
         display: none !important;
       }
-      .a4-sheet {
-        width: 210mm !important;
-        min-height: 297mm !important;
-        max-width: 210mm !important;
+      .canvas-viewport {
+        padding: 0 !important;
         margin: 0 !important;
-        padding: 12mm 15mm !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        display: block !important;
+      }
+      .a4-sheet {
         box-shadow: none !important;
         border: none !important;
-        border-radius: 0 !important;
+        margin: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        max-height: 297mm !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+        transform: scale(1) !important;
       }
-      .invoice-table-header {
-        background-color: #f8fafc !important;
+      .field-input, .dark-field-input {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
       }
-      .page-avoid-break {
-        page-break-inside: avoid;
-        break-inside: avoid;
+      .row-drag-handle, .row-delete-btn, .add-row-container {
+        display: none !important;
       }
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-amber-500 selection:text-slate-950">
+<body class="bg-slate-900 text-slate-800 antialiased h-screen flex flex-col font-sans overflow-hidden">
 
-  <!-- TOP HEADER (Screen only) -->
-  <header class="no-print border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 px-4 py-3">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/20">
-          🎬
-        </div>
-        <div>
-          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">Video Editor Billing Suite & Tax Invoicing</h1>
-          <p class="text-xs text-slate-400">Rate Card Presets, Dynamic UPI QR & A4 PDF Generator</p>
-        </div>
+  <!-- TOP HEADER / CONTROL STRIP -->
+  <header class="no-print bg-slate-900 border-b border-slate-800 z-40 px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-lg text-white">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-900/50">
+        <i data-lucide="video" class="w-5 h-5"></i>
       </div>
-      
-      <!-- Action Buttons: Copy, WhatsApp, Download PDF, Print -->
-      <div class="flex items-center flex-wrap gap-2">
-        <!-- 1. Copy Summary -->
-        <button id="copyQuoteBtn" type="button" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
-          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-          <span id="copyBtnText">Copy Summary</span>
-        </button>
-
-        <!-- 2. WhatsApp Share -->
-        <button id="whatsappShareBtn" type="button" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm shadow-emerald-600/30">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.587 1.831.813 2.801.813 3.179 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.773-5.77zm0-2c4.298 0 7.781 3.479 7.781 7.77s-3.483 7.77-7.781 7.77c-1.34 0-2.614-.351-3.729-.982l-5.302 1.391 1.415-5.176c-.72-1.189-1.124-2.574-1.124-4.003 0-4.291 3.483-7.77 7.74-7.77z"/></svg>
-          <span>Share WhatsApp</span>
-        </button>
-
-        <!-- 3. Direct Download PDF -->
-        <button id="downloadPdfBtn" type="button" onclick="downloadPDFInvoice()" class="text-xs bg-blue-600 hover:bg-blue-500 text-white font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 shadow-md shadow-blue-600/30">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span id="downloadBtnText">Download PDF</span>
-        </button>
-
-      
+      <div>
+        <h1 class="font-bold text-sm sm:text-base tracking-tight leading-tight flex items-center gap-2">
+          Praveenkumar <span class="text-xs font-normal text-slate-400 border-l border-slate-700 pl-2">Invoice Studio</span>
+        </h1>
+        <p class="text-[11px] text-indigo-400 font-medium">Video Editor & Web Developer • UPI Integrated</p>
       </div>
+    </div>
+
+    <!-- Quick Action Toolset -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Zoom controls for viewing A4 comfortably -->
+      <div class="hidden md:flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700 text-xs text-slate-300">
+        <button onclick="adjustZoom(-0.05)" class="px-2 py-1 hover:text-white" title="Zoom Out"><i data-lucide="zoom-out" class="w-3.5 h-3.5"></i></button>
+        <span id="zoomLevelText" class="px-1 text-[11px] font-mono font-bold w-12 text-center">85%</span>
+        <button onclick="adjustZoom(0.05)" class="px-2 py-1 hover:text-white" title="Zoom In"><i data-lucide="zoom-in" class="w-3.5 h-3.5"></i></button>
+        <button onclick="resetZoom()" class="px-1.5 py-1 text-[10px] text-slate-400 hover:text-white border-l border-slate-700">Fit</button>
+      </div>
+
+      <button onclick="resetDefaults()" title="Reset to Praveenkumar's defaults" class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1.5">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Reset</span>
+      </button>
+
+      <button onclick="saveToLocalStorage()" class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-1.5">
+        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Save</span>
+      </button>
+
+      <button onclick="triggerPrintPDF()" class="px-4 py-1.5 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-95 rounded-lg shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2">
+        <i data-lucide="printer" class="w-4 h-4"></i>
+        <span>Download A4 PDF</span>
+      </button>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+  <!-- TEMPLATE SWITCHER BAR -->
+  <div class="no-print bg-slate-850 bg-slate-950/80 border-b border-slate-800/80 px-4 sm:px-6 py-2 flex items-center justify-between gap-4 overflow-x-auto text-xs">
+    <div class="flex items-center gap-2 text-slate-400 flex-shrink-0">
+      <i data-lucide="layout-template" class="w-4 h-4 text-indigo-400"></i>
+      <span class="font-semibold text-slate-200">5 A4 Templates:</span>
+    </div>
 
-      <!-- LEFT COLUMN: CONTROLS (Screen only) -->
-      <div class="no-print xl:col-span-5 space-y-6">
+    <!-- 5 Live Template Switchers -->
+    <div class="flex items-center gap-1.5 overflow-x-auto py-0.5">
+      <button onclick="switchTemplate('modern')" id="tplBtn-modern" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm">
+        <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Modern Tech
+      </button>
+      <button onclick="switchTemplate('minimal')" id="tplBtn-minimal" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
+        <i data-lucide="align-left" class="w-3.5 h-3.5"></i> Minimal Clean
+      </button>
+      <button onclick="switchTemplate('creative')" id="tplBtn-creative" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Creative Studio
+      </button>
+      <button onclick="switchTemplate('corporate')" id="tplBtn-corporate" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
+        <i data-lucide="landmark" class="w-3.5 h-3.5"></i> Corporate Exec
+      </button>
+      <button onclick="switchTemplate('sidebar')" id="tplBtn-sidebar" class="tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white">
+        <i data-lucide="columns-2" class="w-3.5 h-3.5"></i> Split Sidebar
+      </button>
+    </div>
 
-        <!-- 1. SERVICE PRESETS FROM YOUR RATE CARD -->
-        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-5 shadow-xl shadow-amber-500/5 relative overflow-hidden">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-2">
-              <span>⚡</span> Rate Card Presets
-            </h2>
-            <span class="text-[10px] bg-amber-500/10 text-amber-300 border border-amber-500/20 px-2 py-0.5 rounded-full font-medium">Click to Add</span>
-          </div>
+    <!-- Theme Color Palette -->
+    <div class="flex items-center gap-1.5 flex-shrink-0 pl-3 border-l border-slate-800">
+      <span class="text-[11px] text-slate-400 mr-1 hidden lg:inline">Accent:</span>
+      <div id="themePalette" class="flex items-center gap-1.5"></div>
+    </div>
+  </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left">
-            <!-- Preset 1 -->
-            <button type="button" onclick="addCatalogPreset('Reels / Shorts (Up to 60 sec)', 800, 'fixed', 1, 0, 1, 'Vertical 9:16 cut, dynamic captions, sound FX, color pass')"
-              class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-amber-500 hover:bg-slate-800/80 transition flex flex-col justify-between group">
-              <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-semibold text-slate-200 group-hover:text-amber-400">📱 Reels / Shorts</span>
-                <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.2 rounded">JPG</span>
-              </div>
-              <span class="text-[11px] text-amber-400 mono-num font-bold mt-1.5">₹800 <span class="text-[10px] text-slate-500 font-normal">/ fixed</span></span>
-            </button>
+  <!-- WORKSPACE BODY: SIDEBAR + VIEWPORT -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- LEFT SIDEBAR: DETAILED FINANCIAL & METADATA CONTROLS -->
+    <aside class="no-print w-80 lg:w-88 bg-slate-900 border-r border-slate-800 overflow-y-auto text-slate-300 p-4 space-y-5 flex-shrink-0 text-xs">
+      
+      <!-- Currency & Status -->
+      <div class="bg-slate-850 bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60">
+          <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <i data-lucide="coins" class="w-4 h-4 text-indigo-400"></i> Currency & Status
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono" id="sidebarCurrencySymbol">₹ INR</span>
+        </div>
 
-            <!-- Preset 2 -->
-            <button type="button" onclick="addCatalogPreset('Mini Vlogs (Up to 3 min)', 1400, 'fixed', 1, 0, 1, 'Cinematic pacing, background score leveling, B-roll grading & titles')"
-              class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-amber-500 hover:bg-slate-800/80 transition flex flex-col justify-between group">
-              <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-semibold text-slate-200 group-hover:text-amber-400">🎞️ Mini Vlogs (&le; 3m)</span>
-                <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.2 rounded">JPG</span>
-              </div>
-              <span class="text-[11px] text-amber-400 mono-num font-bold mt-1.5">₹1,400 <span class="text-[10px] text-slate-500 font-normal">/ fixed</span></span>
-            </button>
-
-            <!-- Preset 3 -->
-            <button type="button" onclick="addCatalogPreset('Vlogs (3–10 min)', 2500, 'fixed', 1, 0, 1, 'Storyflow trimming, voice enhancement, jump-cut clean up & transitions')"
-              class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-amber-500 hover:bg-slate-800/80 transition flex flex-col justify-between group">
-              <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-semibold text-slate-200 group-hover:text-amber-400">📹 Vlogs (3–10 min)</span>
-                <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.2 rounded">JPG</span>
-              </div>
-              <span class="text-[11px] text-amber-400 mono-num font-bold mt-1.5">₹2,500 <span class="text-[10px] text-slate-500 font-normal">/ fixed</span></span>
-            </button>
-
-            <!-- Preset 4 -->
-            <button type="button" onclick="addCatalogPreset('Long-form YouTube Videos (Per min rate)', 400, 'per_minute', 0, 15, 1, 'Full timeline narrative edit, multi-cam switching, SFX & chapter cards')"
-              class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-amber-500 hover:bg-slate-800/80 transition flex flex-col justify-between group">
-              <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-semibold text-slate-200 group-hover:text-amber-400">▶️ Long-form YouTube</span>
-                <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.2 rounded">JPG</span>
-              </div>
-              <span class="text-[11px] text-amber-400 mono-num font-bold mt-1.5">₹400 <span class="text-[10px] text-slate-500 font-normal">/ video min</span></span>
-            </button>
-
-            <!-- Preset 5 -->
-            <button type="button" onclick="addCatalogPreset('Long-form Weddings Traditional Video (Per hr rate)', 1500, 'per_hour', 1, 30, 1, 'Full ceremony multi-angle sync, audio clean up & continuous chronological edit')"
-              class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-amber-500 hover:bg-slate-800/80 transition flex flex-col justify-between group">
-              <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-semibold text-slate-200 group-hover:text-amber-400">🎎 Wedding Traditional</span>
-                <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.2 rounded">JPG</span>
-              </div>
-              <span class="text-[11px] text-amber-400 mono-num font-bold mt-1.5">₹1,500 <span class="text-[10px] text-slate-500 font-normal">/ hour</span></span>
-            </button>
-
-            <!-- Preset 6 -->
-            <button type="button" onclick="addCatalogPreset('Wedding Highlight or Teaser (3 to 6 min)', 6500, 'fixed', 1, 0, 1, 'Cinematic highlight film, dramatic sound design, LUT grade & emotional pacing')"
-              class="p-2.5 rounded-xl border border-slate-800 bg-slate-950/70 hover:border-amber-500 hover:bg-slate-800/80 transition flex flex-col justify-between group">
-              <div class="flex items-center justify-between w-full">
-                <span class="text-xs font-semibold text-slate-200 group-hover:text-amber-400">💍 Wedding Teaser (3-6m)</span>
-                <span class="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-1.5 py-0.2 rounded">JPG</span>
-              </div>
-              <span class="text-[11px] text-amber-400 mono-num font-bold mt-1.5">₹6,500 <span class="text-[10px] text-slate-500 font-normal">/ teaser</span></span>
-            </button>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Currency Format</label>
+          <div class="grid grid-cols-4 gap-1 text-center font-bold">
+            <button onclick="setCurrency('₹')" class="curr-selector-btn py-1.5 rounded border border-indigo-500 bg-indigo-500/20 text-indigo-300" data-curr="₹">₹ INR</button>
+            <button onclick="setCurrency('$')" class="curr-selector-btn py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-slate-300" data-curr="$">$ USD</button>
+            <button onclick="setCurrency('€')" class="curr-selector-btn py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-slate-300" data-curr="€">€ EUR</button>
+            <button onclick="setCurrency('£')" class="curr-selector-btn py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-slate-300" data-curr="£">£ GBP</button>
           </div>
         </div>
 
-        <!-- 2. SERVICE LINE ITEMS MANAGER -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <span>📋</span> Billed Line Items (<span id="itemsCountBadge">0</span>)
-            </h2>
-            <button type="button" onclick="addNewCustomItem()" class="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition shadow-md shadow-amber-500/10">
-              <span>+ Custom Service</span>
-            </button>
-          </div>
-
-          <!-- Items Container -->
-          <div id="serviceItemsContainer" class="space-y-3.5">
-            <!-- Dynamically populated -->
+        <div>
+          <label class="block text-[11px] font-medium text-slate-400 mb-1.5">Invoice State Badge</label>
+          <div class="grid grid-cols-4 gap-1 text-center font-bold text-[10px]">
+            <button onclick="setStatus('PAID')" id="status-paid" class="status-btn py-1 rounded border border-slate-700 hover:bg-slate-700 text-emerald-400">PAID</button>
+            <button onclick="setStatus('PENDING')" id="status-pending" class="status-btn py-1 rounded border border-amber-500 bg-amber-500/20 text-amber-300">PENDING</button>
+            <button onclick="setStatus('OVERDUE')" id="status-overdue" class="status-btn py-1 rounded border border-slate-700 hover:bg-slate-700 text-rose-400">OVERDUE</button>
+            <button onclick="setStatus('DRAFT')" id="status-draft" class="status-btn py-1 rounded border border-slate-700 hover:bg-slate-700 text-slate-400">DRAFT</button>
           </div>
         </div>
+      </div>
 
-        <!-- 3. GST & TAX SETTINGS -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <div class="flex items-center justify-between">
-            <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <span>🏛️</span> Tax & SAC Settings
-            </h2>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="enableGstToggle" checked onchange="toggleGst(this.checked)" class="accent-amber-500 w-4 h-4 rounded" />
-              <span class="text-xs font-semibold text-amber-400">Apply GST</span>
-            </label>
-          </div>
-
-          <div id="gstConfigBody" class="space-y-3">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">GST Rate (%)</label>
-                <select id="gstRateSelect" onchange="handleGstRateChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
-                  <option value="0">0% (Nil / Exempt)</option>
-                  <option value="5">5%</option>
-                  <option value="12">12%</option>
-                  <option value="18" selected>18% (Standard Service)</option>
-                  <option value="28">28%</option>
-                  <option value="custom">Custom %</option>
-                </select>
-              </div>
-
-              <div id="customGstBlock" class="hidden">
-                <label class="block text-xs font-medium text-slate-400 mb-1">Custom Rate (%)</label>
-                <input type="number" id="customGstInput" value="18" min="0" max="100" step="0.5" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none mono-num" />
-              </div>
-
-              <div id="gstTypeBlock">
-                <label class="block text-xs font-medium text-slate-400 mb-1">Tax Split Type</label>
-                <select id="gstTypeSelect" onchange="renderInvoice()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
-                  <option value="intra">Intra-State (CGST + SGST)</option>
-                  <option value="inter">Inter-State (IGST)</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">SAC Code (Services)</label>
-                <input type="text" id="sacCodeInput" value="998311" placeholder="e.g. 998311" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none mono-num" />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Editor GSTIN (Optional)</label>
-                <input type="text" id="editorGstinInput" value="" placeholder="Optional GSTIN" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-amber-400 focus:border-amber-500 outline-none uppercase font-mono" />
-              </div>
-            </div>
-          </div>
+      <!-- Financial Calculation (Tax, GST, Discount, Paid Amount) -->
+      <div class="bg-slate-850 bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60">
+          <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <i data-lucide="calculator" class="w-4 h-4 text-indigo-400"></i> Taxes & Adjustments
+          </span>
+          <button onclick="setQuickGST(18)" class="text-[10px] font-bold text-indigo-400 hover:underline">18% GST Toggle</button>
         </div>
 
-        <!-- 4. PARTIES & INVOICE DETAILS -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-          <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-            <span>👤</span> Parties & Invoice Meta
-          </h2>
-
-          <div class="space-y-3">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Editor / Studio Name</label>
-                <input type="text" id="editorName" value="Kishore Kumar" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Payee Name (for UPI)</label>
-                <input type="text" id="payeeName" value="Kishore Kumar" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Editor Email</label>
-                <input type="email" id="editorEmail" value="editor@example.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Editor Phone</label>
-                <input type="text" id="editorPhone" value="+91 98765 43210" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-            </div>
-
-            <div class="border-t border-slate-800 pt-3 grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Client / Channel Name</label>
-                <input type="text" id="clientName" value="Wanderlust Productions" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Project Assignment</label>
-                <input type="text" id="projectTitle" value="Europe Travel & Food Delivery Vlog Series" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Client Email</label>
-                <input type="email" id="clientEmail" value="contact@wanderlust.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Client Phone</label>
-                <input type="text" id="clientPhone" value="+91 91234 56789" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Client GSTIN (Optional)</label>
-              <input type="text" id="clientGstinInput" value="" placeholder="Unregistered if blank" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 outline-none font-mono uppercase" />
-            </div>
-
-            <div class="grid grid-cols-3 gap-2">
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Invoice No</label>
-                <div class="flex gap-1">
-                  <input type="text" id="invoiceNumber" value="INV-2026-1048" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-xs text-white focus:border-amber-500 outline-none mono-num" />
-                  <button type="button" onclick="regenerateInvNumber()" title="Randomize" class="text-xs bg-slate-800 hover:bg-slate-700 px-2 rounded-lg border border-slate-700 text-slate-300">↻</button>
-                </div>
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Invoice Date</label>
-                <input type="date" id="invoiceDate" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-              <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Due Date</label>
-                <input type="date" id="dueDate" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-2 text-xs text-white focus:border-amber-500 outline-none" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. UPI PAYMENT CONFIGURATION -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
-          <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-            <span>📱</span> UPI QR Code Configuration
-          </h2>
+        <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">UPI ID / VPA</label>
-            <input type="text" id="upiIdInput" value="editor@oksbi" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-amber-400 font-mono focus:border-amber-500 outline-none" />
-            <p class="text-[10px] text-slate-500 mt-1">Generates dynamic UPI code with the exact total amount pre-filled.</p>
+            <label class="block text-[11px] text-slate-400 mb-1">Tax / GST (%)</label>
+            <div class="relative">
+              <input type="number" id="ctrlTaxRate" value="18" min="0" max="100" step="0.5" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+              <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs">%</span>
+            </div>
           </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Discount</label>
+            <div class="flex">
+              <input type="number" id="ctrlDiscount" value="0" min="0" step="1" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-l-lg px-2 py-1.5 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+              <select id="ctrlDiscountType" onchange="syncStateFromInputs()" class="bg-slate-800 border-y border-r border-slate-700 rounded-r-lg px-1 text-slate-300 text-xs focus:outline-none font-bold">
+                <option value="%">%</option>
+                <option value="flat">Flat</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Already Paid Amount (Deposit)</label>
+          <div class="relative">
+            <span class="absolute left-2.5 top-1.5 text-slate-500 font-mono text-xs" id="paidSymbolPrefix">₹</span>
+            <input type="number" id="ctrlPaidAmount" value="0" min="0" step="100" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-2.5 py-1.5 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <!-- UPI Payment Settings -->
+      <div class="bg-slate-850 bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60">
+          <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <i data-lucide="qr-code" class="w-4 h-4 text-emerald-400"></i> UPI Instant Pay Setup
+          </span>
+          <button onclick="copyUpiId()" class="text-[10px] text-emerald-400 hover:underline flex items-center gap-1">
+            <i data-lucide="copy" class="w-3 h-3"></i> Copy UPI
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">UPI VPA Address</label>
+          <input type="text" id="ctrlUpiId" value="8667536739-2@ybl" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 font-mono text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Payee Legal Name</label>
+          <input type="text" id="ctrlPayeeName" value="Praveenkumar" oninput="syncStateFromInputs()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-100 text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+        </div>
+
+        <div class="text-[11px] text-slate-400 leading-relaxed bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 flex items-start gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5"></i>
+          <span>Auto-generates compliant QR with total balance due for GPay, PhonePe, Paytm, and BHIM UPI.</span>
+        </div>
+      </div>
+
+      <!-- Quick Add Item Button in sidebar -->
+      <div>
+        <button onclick="addNewLineItem()" class="w-full py-2.5 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-indigo-200 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Service Line Item
+        </button>
+      </div>
+
+      <!-- Print Guidelines Helper -->
+      <div class="p-3 bg-slate-800/40 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
+        <p class="font-bold text-slate-300 flex items-center gap-1">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-400"></i> A4 PDF Instructions:
+        </p>
+        <p>In browser print dialog, choose: <strong>Destination: Save as PDF</strong>, <strong>Margins: None</strong>, and ensure <strong>Background graphics: Checked</strong>.</p>
+      </div>
+
+    </aside>
+
+    <!-- MAIN CANVAS VIEWPORT (WITH REAL-TIME SCALING) -->
+    <main id="viewportContainer" class="flex-1 bg-slate-950 p-4 sm:p-8 overflow-auto flex justify-center items-start canvas-viewport">
+      
+      <!-- ZOOM WRAPPER -->
+      <div id="canvasScaler" class="transition-transform duration-150 origin-top">
+        
+        <!-- A4 PAPER CANVAS -->
+        <div id="invoiceCanvas" class="a4-sheet shadow-2xl rounded-sm">
+          <!-- Dynamically Rendered by Template Engine -->
         </div>
 
       </div>
 
-      <!-- RIGHT COLUMN: EXACT A4 INVOICE SHEET (SCREEN & DOWNLOAD CONTAINER) -->
-      <div class="xl:col-span-7 flex flex-col items-center">
-        <div class="no-print w-full mb-3 flex items-center justify-between text-xs text-slate-400 px-1">
-          <span class="flex items-center gap-2 font-medium">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            A4 Standard Dimensions (210mm &times; 297mm)
-          </span>
-          <span class="text-slate-500">WYSIWYG: What you see is downloaded</span>
-        </div>
+    </main>
 
-        <!-- THE INVOICE SHEET -->
-        <div id="invoiceSheet" class="a4-sheet bg-white text-slate-900 rounded-2xl shadow-2xl p-8 sm:p-12 border border-slate-200 flex flex-col justify-between">
-          
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastMessage" class="no-print fixed bottom-6 right-6 z-50 bg-slate-900 text-white border border-slate-700 px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-xs translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastText">Action completed</span>
+  </div>
+
+  <!-- ==========================================================
+       JAVASCRIPT APPLICATION LOGIC
+  ========================================================== -->
+  <script>
+    /* ==========================================================
+       CENTRAL REACTIVE STATE
+    ========================================================== */
+    const STATE = {
+      template: 'modern', // 'modern', 'minimal', 'creative', 'corporate', 'sidebar'
+      accent: '#4f46e5',
+      zoom: 0.85,
+      currency: '₹',
+      status: 'PENDING',
+      
+      // Praveenkumar Personal Defaults
+      company: {
+        name: 'Praveenkumar',
+        title: 'Video Editor & Web Developer',
+        email: 'praveenkumarcse2001@gmail.com',
+        phone: '+91 8667536739',
+        location: 'Tamil Nadu, India',
+        tagline: 'High-Impact Video Post-Production & Modern Web Architectures'
+      },
+
+      // Client Data
+      client: {
+        name: 'Alex Rivera',
+        company: 'Vanguard Studios & Media Inc.',
+        email: 'billing@vanguardmedia.co',
+        phone: '+91 98401 23456',
+        address: 'Tower 4, Olympia Tech Park, Guindy, Chennai, TN 600032'
+      },
+
+      // Invoice Metadata
+      invoice: {
+        number: 'INV-2026-089',
+        date: '2026-10-19',
+        dueDate: '2026-10-29',
+        taxRate: 18, // 18% GST
+        discount: 0,
+        discountType: '%',
+        paidAmount: 0,
+        upiId: '8667536739-2@ybl',
+        payeeName: 'Praveenkumar',
+        notes: 'Thank you for choosing Praveenkumar Creative & Engineering Services. Bank transfer or instant UPI payment are both accepted.',
+        terms: '1. Net 10 days payment term applies.\n2. Final deliverables, raw projects & commercial licenses are released post balance settlement.'
+      },
+
+      // Line Items
+      items: [
+        {
+          id: 1,
+          name: '4K Commercial Video Editing & Cinematic Color Grading',
+          desc: 'Timeline editing, multi-cam audio synchronization, DaVinci Resolve color grading & delivery.',
+          qty: 1,
+          rate: 18500
+        },
+        {
+          id: 2,
+          name: 'Full-Stack Next.js / Tailwind Responsive Web App',
+          desc: 'Dynamic application with modern interactive UX, mobile-first design, SEO, and deployment.',
+          qty: 1,
+          rate: 26000
+        },
+        {
+          id: 3,
+          name: 'Social Media Vertical Cutdowns & Motion Graphics (Reels/Shorts)',
+          desc: 'High-retention captions, kinetic typography, SFX pack, and custom 9:16 export sets.',
+          qty: 4,
+          rate: 2500
+        }
+      ]
+    };
+
+    const THEME_PRESETS = [
+      { name: 'Indigo', color: '#4f46e5' },
+      { name: 'Emerald', color: '#059669' },
+      { name: 'Crimson', color: '#e11d48' },
+      { name: 'Amber', color: '#d97706' },
+      { name: 'Slate', color: '#334155' },
+      { name: 'Violet', color: '#7c3aed' }
+    ];
+
+    /* ==========================================================
+       LIFECYCLE INIT
+    ========================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadFromLocalStorage();
+      buildThemePalette();
+      applyZoom();
+      renderInvoice();
+      updateSidebarInputs();
+      lucide.createIcons();
+    });
+
+    /* ==========================================================
+       CALCULATIONS
+    ========================================================== */
+    function calculateTotals() {
+      const subtotal = STATE.items.reduce((sum, item) => sum + (Number(item.qty || 0) * Number(item.rate || 0)), 0);
+      
+      let discountVal = 0;
+      if (STATE.invoice.discountType === '%') {
+        discountVal = subtotal * (Number(STATE.invoice.discount || 0) / 100);
+      } else {
+        discountVal = Number(STATE.invoice.discount || 0);
+      }
+
+      const taxableAmount = Math.max(0, subtotal - discountVal);
+      const taxAmount = taxableAmount * (Number(STATE.invoice.taxRate || 0) / 100);
+      const grandTotal = Math.round((taxableAmount + taxAmount) * 100) / 100;
+      const balanceDue = Math.max(0, grandTotal - Number(STATE.invoice.paidAmount || 0));
+
+      return {
+        subtotal,
+        discountVal,
+        taxAmount,
+        grandTotal,
+        balanceDue
+      };
+    }
+
+    function formatMoney(amount) {
+      return Number(amount || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    /* ==========================================================
+       TEMPLATE RENDER ENGINE
+    ========================================================== */
+    function renderInvoice() {
+      const canvas = document.getElementById('invoiceCanvas');
+      const totals = calculateTotals();
+
+      // Reset classes
+      canvas.className = 'a4-sheet shadow-2xl rounded-sm';
+
+      switch (STATE.template) {
+        case 'minimal':
+          canvas.innerHTML = getMinimalTemplateHTML(totals);
+          break;
+        case 'creative':
+          canvas.innerHTML = getCreativeTemplateHTML(totals);
+          break;
+        case 'corporate':
+          canvas.innerHTML = getCorporateTemplateHTML(totals);
+          break;
+        case 'sidebar':
+          canvas.innerHTML = getSplitSidebarTemplateHTML(totals);
+          break;
+        case 'modern':
+        default:
+          canvas.innerHTML = getModernTemplateHTML(totals);
+          break;
+      }
+
+      // Re-generate dynamic UPI QR in the current template
+      setTimeout(() => {
+        generateUpiQrCode(totals.balanceDue > 0 ? totals.balanceDue : totals.grandTotal);
+        lucide.createIcons();
+      }, 30);
+    }
+
+    /* ----------------------------------------------------------
+       TEMPLATE 1: MODERN TECH
+    ---------------------------------------------------------- */
+    function getModernTemplateHTML(t) {
+      return `
+        <div class="p-10 flex-1 flex flex-col justify-between">
           <div>
-            <!-- INVOICE HEADER -->
-            <div class="flex flex-row justify-between items-start pb-6 border-b border-slate-200">
-              <div class="space-y-1 max-w-[60%]">
-                <div class="inline-block px-2.5 py-0.5 bg-amber-100 text-amber-900 text-[10px] font-bold tracking-wider uppercase rounded">Tax Invoice</div>
-                <h1 id="invEditorName" class="heading-font text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">Kishore Kumar</h1>
-                <p class="text-xs text-slate-600 font-semibold">Video Post-Production & Color Studio</p>
-                <div class="pt-1 text-[11px] text-slate-500 leading-relaxed">
-                  <p id="invEditorEmail">editor@example.com</p>
-                  <p id="invEditorPhone">+91 98765 43210</p>
-                  <p id="invEditorGstinRow" class="font-mono text-slate-700 font-medium">GSTIN: <span id="invEditorGstin"></span></p>
+            <!-- Header Bar -->
+            <div class="flex justify-between items-start pb-6 border-b-2" style="border-color: ${STATE.accent};">
+              <div class="space-y-1 max-w-sm">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-extrabold text-lg shadow-sm" style="background-color: ${STATE.accent};">
+                    PK
+                  </div>
+                  <div>
+                    <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="field-input font-extrabold text-xl text-slate-900 tracking-tight leading-none" placeholder="Your Name">
+                    <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="field-input text-xs font-semibold uppercase tracking-wider" style="color: ${STATE.accent};" placeholder="Title">
+                  </div>
+                </div>
+                <div class="text-[11px] text-slate-500 pt-1 leading-snug space-y-0.5">
+                  <div class="flex items-center gap-1.5"><i data-lucide="mail" class="w-3 h-3 text-slate-400"></i> <input type="text" value="${escapeHtml(STATE.company.email)}" oninput="updateField('company.email', this.value)" class="field-input text-slate-600"></div>
+                  <div class="flex items-center gap-1.5"><i data-lucide="phone" class="w-3 h-3 text-slate-400"></i> <input type="text" value="${escapeHtml(STATE.company.phone)}" oninput="updateField('company.phone', this.value)" class="field-input text-slate-600"></div>
+                  <div class="flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3 h-3 text-slate-400"></i> <input type="text" value="${escapeHtml(STATE.company.location)}" oninput="updateField('company.location', this.value)" class="field-input text-slate-600"></div>
                 </div>
               </div>
 
-              <div class="text-right">
-                <div class="heading-font text-3xl font-black text-slate-900 tracking-tight">INVOICE</div>
-                <div class="mt-2 space-y-1 text-xs">
+              <!-- Invoice Meta & Badge -->
+              <div class="text-right space-y-2">
+                <div class="flex items-center justify-end gap-2">
+                  <span class="font-black text-2xl tracking-tight text-slate-900">INVOICE</span>
+                  ${getStatusBadgeHTML()}
+                </div>
+                <div class="text-[11px] space-y-1">
                   <div class="flex justify-end gap-2">
-                    <span class="text-slate-400 font-medium">Invoice No:</span>
-                    <span id="invNumberDisplay" class="font-bold text-slate-900 mono-num">INV-2026-1048</span>
+                    <span class="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Invoice #:</span>
+                    <input type="text" value="${escapeHtml(STATE.invoice.number)}" oninput="updateField('invoice.number', this.value)" class="field-input font-mono font-bold text-slate-800 text-right w-28">
                   </div>
                   <div class="flex justify-end gap-2">
-                    <span class="text-slate-400 font-medium">Date:</span>
-                    <span id="invDateDisplay" class="font-bold text-slate-900"></span>
+                    <span class="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Date:</span>
+                    <input type="date" value="${STATE.invoice.date}" oninput="updateField('invoice.date', this.value)" class="field-input text-slate-700 text-right w-28">
                   </div>
                   <div class="flex justify-end gap-2">
-                    <span class="text-slate-400 font-medium">Due Date:</span>
-                    <span id="invDueDateDisplay" class="font-bold text-amber-800"></span>
-                  </div>
-                  <div class="flex justify-end gap-2">
-                    <span class="text-slate-400 font-medium">SAC Code:</span>
-                    <span id="invSacCode" class="font-mono font-bold text-slate-800">998311</span>
+                    <span class="text-slate-400 font-bold uppercase text-[9px] tracking-wider">Due Date:</span>
+                    <input type="date" value="${STATE.invoice.dueDate}" oninput="updateField('invoice.dueDate', this.value)" class="field-input font-bold text-slate-900 text-right w-28">
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- BILLED TO & PROJECT DETAILS -->
-            <div class="grid grid-cols-2 gap-6 py-5 border-b border-slate-100 text-xs">
-              <div>
-                <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Billed To (Client)</span>
-                <div id="invClientName" class="text-sm font-bold text-slate-950">Wanderlust Productions</div>
-                <div id="invClientEmail" class="text-slate-600 mt-0.5">contact@wanderlust.com</div>
-                <div id="invClientPhone" class="text-slate-600 mt-0.5">+91 91234 56789</div>
-                <div id="invClientGstinRow" class="text-slate-600 mt-0.5 font-mono text-[11px]">GSTIN: <span id="invClientGstin"></span></div>
+            <!-- Client & Project Cards -->
+            <div class="grid grid-cols-2 gap-4 my-5">
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
+                  <i data-lucide="user" class="w-3 h-3"></i> Billed To Client
+                </p>
+                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="field-input font-bold text-slate-900 text-xs" placeholder="Client Name">
+                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="field-input text-[11px] text-slate-600 font-medium" placeholder="Company Name">
+                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="field-input text-[11px] text-slate-500" placeholder="Address">
+                <input type="text" value="${escapeHtml(STATE.client.email)}" oninput="updateField('client.email', this.value)" class="field-input text-[10px] text-slate-400 font-mono" placeholder="Email">
               </div>
 
-              <div>
-                <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Project Assignment</span>
-                <div id="invProjectTitle" class="text-sm font-bold text-slate-950">Europe Travel & Food Delivery Vlog Series</div>
-                <div class="text-slate-500 text-[11px] mt-0.5">Editing, Sound Design, Grading & Master Render</div>
+              <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+                <div>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
+                    <i data-lucide="layers" class="w-3 h-3"></i> Project Scope
+                  </p>
+                  <p class="text-xs font-bold text-slate-800">Video Post-Production & Web Handover</p>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Deliverables: Master 4K exports, Next.js code repo.</p>
+                </div>
+                <div class="pt-2 border-t border-slate-200/80 flex justify-between items-center text-[10px]">
+                  <span class="text-slate-500">Terms: <strong class="text-slate-800">Net 10 Days</strong></span>
+                  <span class="font-mono font-bold text-slate-700 bg-slate-200/60 px-1.5 py-0.5 rounded">${STATE.currency} Billing</span>
+                </div>
               </div>
             </div>
 
-            <!-- ITEMIZED SERVICES TABLE -->
-            <div class="py-5">
-              <table class="w-full text-left border-collapse table-fixed">
-                <thead>
-                  <tr class="invoice-table-header border-b-2 border-slate-900 text-[10px] uppercase font-bold tracking-wider text-slate-600 bg-slate-50">
-                    <th class="py-2.5 px-2 w-[48%]">Service & Description</th>
-                    <th class="py-2.5 px-2 text-center w-[18%]">Qty / Duration</th>
-                    <th class="py-2.5 px-2 text-right w-[16%]">Rate</th>
-                    <th class="py-2.5 px-2 text-right w-[18%]">Amount (₹)</th>
+            <!-- Items Table -->
+            <div class="overflow-hidden rounded-xl border border-slate-200">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-100 text-slate-800 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th class="py-2.5 px-3 w-[52%]">Deliverable / Description</th>
+                    <th class="py-2.5 px-2 text-right w-[12%]">Qty/Hrs</th>
+                    <th class="py-2.5 px-2 text-right w-[16%]">Rate (${STATE.currency})</th>
+                    <th class="py-2.5 px-3 text-right w-[16%]">Total (${STATE.currency})</th>
+                    <th class="py-2.5 px-1 text-center w-[4%] no-print"></th>
                   </tr>
                 </thead>
-                <tbody id="invoiceTableBody" class="text-xs divide-y divide-slate-100">
-                  <!-- Rendered dynamically -->
+                <tbody class="divide-y divide-slate-100">
+                  ${getItemsTableRowsHTML()}
                 </tbody>
               </table>
             </div>
-          </div>
 
-          <!-- SUMMARY, GST BREAKDOWN & UPI QR SECTION -->
-          <div class="page-avoid-break pt-4 border-t-2 border-slate-900">
-            <div class="grid grid-cols-12 gap-6 items-end">
-              
-              <!-- LEFT: UPI & QR CODE BOX -->
-              <div class="col-span-7 bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center gap-4">
-                <div class="flex-shrink-0 w-24 h-24 bg-white border border-slate-300 rounded-lg p-1 flex items-center justify-center overflow-hidden shadow-sm">
-                  <div id="qrcodeCanvasContainer" class="w-full h-full flex items-center justify-center"></div>
-                </div>
-
-                <div class="space-y-1">
-                  <div class="text-[9px] uppercase font-extrabold tracking-wider text-slate-500">Scan to Pay (Instant UPI)</div>
-                  <div class="text-xs font-bold text-slate-900">GPay • PhonePe • Paytm • BHIM</div>
-                  <div class="pt-0.5">
-                    <span class="text-[10px] text-slate-500 block">UPI ID (VPA):</span>
-                    <span id="invUpiIdDisplay" class="font-bold text-xs text-amber-800 bg-amber-50 px-2 py-0.5 rounded mono-num border border-amber-200 inline-block">editor@oksbi</span>
-                  </div>
-                  <div class="text-[9px] text-slate-400">Total amount pre-filled automatically on scan</div>
-                </div>
-              </div>
-
-              <!-- RIGHT: FINANCIAL TOTALS & TAX -->
-              <div class="col-span-5 space-y-1.5 text-right text-xs">
-                <div class="flex justify-between text-slate-600">
-                  <span>Taxable Subtotal:</span>
-                  <span id="invSubtotalDisplay" class="font-medium mono-num">₹0.00</span>
-                </div>
-
-                <!-- GST Rows (Dynamic) -->
-                <div id="gstSplitContainer" class="space-y-1.5 border-t border-slate-100 pt-1.5">
-                  <!-- Dynamic CGST/SGST or IGST -->
-                </div>
-
-                <div class="border-t-2 border-slate-900 pt-2 flex justify-between items-baseline">
-                  <span class="text-sm font-black text-slate-950">Grand Total:</span>
-                  <span id="invTotalDueDisplay" class="heading-font text-2xl font-black text-slate-950 mono-num">₹0.00</span>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- FOOTER -->
-            <div class="mt-6 pt-3 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400">
-              <p>Thank you for your business. Please ensure payment is completed by the due date.</p>
-              <p class="font-mono">Computer Generated Invoice</p>
+            <div class="mt-2 no-print add-row-container">
+              <button onclick="addNewLineItem()" class="text-xs font-semibold px-2.5 py-1 rounded text-indigo-600 hover:bg-indigo-50 flex items-center gap-1 transition-colors">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Item
+              </button>
             </div>
           </div>
 
+          <!-- Bottom Section: Payment UPI & Totals -->
+          <div class="pt-4 border-t border-slate-200 grid grid-cols-12 gap-5 items-end">
+            <div class="col-span-7 space-y-3">
+              ${getUpiCardHTML()}
+              <div>
+                <p class="text-[9px] font-bold uppercase text-slate-400">Payment Terms</p>
+                <textarea oninput="updateField('invoice.terms', this.value)" rows="2" class="field-input text-[10px] text-slate-500 resize-none leading-relaxed">${escapeHtml(STATE.invoice.terms)}</textarea>
+              </div>
+            </div>
+
+            <div class="col-span-5 space-y-1.5 text-xs">
+              ${getTotalsSummaryHTML(t)}
+            </div>
+          </div>
         </div>
 
-      </div>
-
-    </div>
-  </main>
-
-  <!-- JAVASCRIPT ENGINE -->
-  <script>
-    // Master State
-    const state = {
-      items: [
-        {
-          id: 'item-1',
-          title: 'Reels / Shorts (Up to 60 sec)',
-          desc: 'Vertical 9:16 cut, dynamic captions, sound FX, color pass',
-          mode: 'fixed', // 'fixed', 'per_minute', 'per_hour'
-          rate: 800,
-          hours: 0,
-          minutes: 0,
-          qty: 2
-        },
-        {
-          id: 'item-2',
-          title: 'Long-form YouTube Videos (Per min rate)',
-          desc: 'Full narrative edit, multi-cam switching, SFX & chapter cards',
-          mode: 'per_minute',
-          rate: 400,
-          hours: 0,
-          minutes: 10,
-          qty: 1
-        }
-      ],
-      gstEnabled: true,
-      gstRate: 18,
-      gstType: 'intra', // 'intra' (CGST+SGST) | 'inter' (IGST)
-      sacCode: '998311',
-      lastGrandTotal: 0
-    };
-
-    // Helper: INR Currency Formatter
-    function formatINR(val) {
-      return new Intl.NumberFormat('en-IN', {
-        maximumFractionDigits: 2,
-        minimumFractionDigits: 2
-      }).format(val || 0);
+        <!-- Footer -->
+        <div class="px-10 py-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400">
+          <span>Praveenkumar • Video Editor & Web Developer</span>
+          <span>${escapeHtml(STATE.company.email)} • ${escapeHtml(STATE.company.phone)}</span>
+        </div>
+      `;
     }
 
-    // Set Initial Dates
-    const today = new Date();
-    const dueDate = new Date();
-    dueDate.setDate(today.getDate() + 7);
+    /* ----------------------------------------------------------
+       TEMPLATE 2: MINIMAL CLEAN
+    ---------------------------------------------------------- */
+    function getMinimalTemplateHTML(t) {
+      return `
+        <div class="p-12 flex-1 flex flex-col justify-between font-sans">
+          <div>
+            <!-- Minimal Header -->
+            <div class="flex justify-between items-start pb-8 border-b border-slate-200">
+              <div>
+                <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="field-input font-bold text-3xl text-slate-900 tracking-tight" placeholder="Your Name">
+                <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="field-input text-xs text-slate-500 font-medium tracking-wide uppercase mt-0.5" placeholder="Title">
+              </div>
+              <div class="text-right">
+                <p class="text-xs uppercase tracking-widest text-slate-400 font-bold">Invoice</p>
+                <input type="text" value="${escapeHtml(STATE.invoice.number)}" oninput="updateField('invoice.number', this.value)" class="field-input font-mono font-bold text-lg text-slate-900 text-right w-36">
+                <div class="mt-1">${getStatusBadgeHTML()}</div>
+              </div>
+            </div>
 
-    document.getElementById('invoiceDate').value = today.toISOString().split('T')[0];
-    document.getElementById('dueDate').value = dueDate.toISOString().split('T')[0];
+            <!-- Metadata Row -->
+            <div class="grid grid-cols-3 gap-6 py-6 border-b border-slate-200 text-xs">
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">From</p>
+                <p class="font-bold text-slate-800">${escapeHtml(STATE.company.name)}</p>
+                <input type="text" value="${escapeHtml(STATE.company.email)}" oninput="updateField('company.email', this.value)" class="field-input text-slate-500 text-[11px]">
+                <input type="text" value="${escapeHtml(STATE.company.phone)}" oninput="updateField('company.phone', this.value)" class="field-input text-slate-500 text-[11px]">
+              </div>
+              <div>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Billed To</p>
+                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="field-input font-bold text-slate-800">
+                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="field-input text-slate-500 text-[11px]">
+                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="field-input text-slate-500 text-[11px]">
+              </div>
+              <div class="space-y-1">
+                <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Invoice Details</p>
+                <div class="flex justify-between"><span class="text-slate-400">Date:</span> <input type="date" value="${STATE.invoice.date}" oninput="updateField('invoice.date', this.value)" class="field-input text-right text-slate-700 w-28"></div>
+                <div class="flex justify-between"><span class="text-slate-400">Due Date:</span> <input type="date" value="${STATE.invoice.dueDate}" oninput="updateField('invoice.dueDate', this.value)" class="field-input font-semibold text-right text-slate-800 w-28"></div>
+              </div>
+            </div>
 
-    // Compute line item amount
-    function calculateItemAmount(item) {
-      const rate = parseFloat(item.rate) || 0;
-      if (item.mode === 'per_hour') {
-        const totalMinutes = (parseInt(item.hours) || 0) * 60 + (parseInt(item.minutes) || 0);
-        return (totalMinutes * (rate / 60));
-      } else if (item.mode === 'per_minute') {
-        const totalMinutes = (parseInt(item.hours) || 0) * 60 + (parseInt(item.minutes) || 0);
-        return totalMinutes * rate;
-      } else {
-        return rate * (parseInt(item.qty) || 1);
-      }
+            <!-- Line Items Table -->
+            <div class="mt-6">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="border-b border-slate-900 text-slate-900 font-bold uppercase text-[9px] tracking-wider">
+                    <th class="py-2 w-[52%]">Description</th>
+                    <th class="py-2 text-right w-[12%]">Qty</th>
+                    <th class="py-2 text-right w-[16%]">Rate (${STATE.currency})</th>
+                    <th class="py-2 text-right w-[16%]">Total (${STATE.currency})</th>
+                    <th class="py-2 text-center w-[4%] no-print"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  ${getItemsTableRowsHTML()}
+                </tbody>
+              </table>
+              <div class="mt-2 no-print add-row-container">
+                <button onclick="addNewLineItem()" class="text-xs font-semibold px-2 py-1 text-slate-600 hover:text-slate-900 flex items-center gap-1">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add item
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Minimal Bottom: UPI & Totals -->
+          <div class="pt-6 border-t border-slate-200 grid grid-cols-12 gap-8 items-end">
+            <div class="col-span-6 space-y-3">
+              ${getUpiCardHTML(true)}
+              <div class="text-[10px] text-slate-500 leading-relaxed">
+                <p class="font-bold text-slate-700 uppercase tracking-wider text-[9px]">Notes:</p>
+                <textarea oninput="updateField('invoice.notes', this.value)" rows="2" class="field-input text-[10px] text-slate-500 resize-none">${escapeHtml(STATE.invoice.notes)}</textarea>
+              </div>
+            </div>
+            <div class="col-span-6 space-y-1.5 text-xs">
+              ${getTotalsSummaryHTML(t)}
+            </div>
+          </div>
+        </div>
+
+        <div class="px-12 py-3 border-t border-slate-100 text-center text-[10px] text-slate-400">
+          Praveenkumar • 8667536739 • praveenkumarcse2001@gmail.com
+        </div>
+      `;
     }
 
-    // Render Service Item Cards in Left Form
-    function renderItemsEditor() {
-      const container = document.getElementById('serviceItemsContainer');
-      document.getElementById('itemsCountBadge').textContent = state.items.length;
-      container.innerHTML = '';
-
-      state.items.forEach((item, index) => {
-        const itemAmount = calculateItemAmount(item);
-        const card = document.createElement('div');
-        card.className = 'bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-3 relative';
-        
-        let durationInputsHtml = '';
-        if (item.mode === 'fixed') {
-          durationInputsHtml = `
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Quantity</label>
-              <input type="number" min="1" value="${item.qty}" onchange="updateItemField('${item.id}', 'qty', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white mono-num focus:border-amber-500 outline-none" />
-            </div>
-          `;
-        } else if (item.mode === 'per_minute') {
-          const totalMin = (item.hours * 60) + item.minutes;
-          durationInputsHtml = `
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Duration (Mins)</label>
-              <input type="number" min="1" value="${totalMin}" onchange="updateMinutesTotal('${item.id}', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white mono-num focus:border-amber-500 outline-none" />
-            </div>
-          `;
-        } else {
-          // per_hour
-          durationInputsHtml = `
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-[11px] text-slate-400 mb-1">Hours</label>
-                <input type="number" min="0" value="${item.hours}" onchange="updateItemField('${item.id}', 'hours', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-white mono-num focus:border-amber-500 outline-none" />
-              </div>
-              <div>
-                <label class="block text-[11px] text-slate-400 mb-1">Minutes</label>
-                <input type="number" min="0" max="59" value="${item.minutes}" onchange="updateItemField('${item.id}', 'minutes', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-white mono-num focus:border-amber-500 outline-none" />
-              </div>
-            </div>
-          `;
-        }
-
-        card.innerHTML = `
-          <div class="flex items-center justify-between pb-1.5 border-b border-slate-800/80">
-            <span class="text-xs font-bold text-amber-400">#${index + 1} Line Item</span>
-            <button type="button" onclick="deleteServiceItem('${item.id}')" class="text-rose-400 hover:text-rose-300 text-[11px] flex items-center gap-1 font-medium transition cursor-pointer">
-              <span>✕ Delete</span>
-            </button>
-          </div>
-
-          <div class="space-y-2.5">
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Service Title</label>
-              <input type="text" value="${item.title.replace(/"/g, '&quot;')}" oninput="updateItemField('${item.id}', 'title', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 outline-none" />
-            </div>
-
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1">Description / Deliverable</label>
-              <input type="text" value="${item.desc.replace(/"/g, '&quot;')}" oninput="updateItemField('${item.id}', 'desc', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-300 focus:border-amber-500 outline-none" placeholder="Optional notes..." />
-            </div>
-
-            <div class="grid grid-cols-3 gap-2 pt-1">
-              <div>
-                <label class="block text-[11px] text-slate-400 mb-1">Pricing Mode</label>
-                <select onchange="updateItemField('${item.id}', 'mode', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-slate-200 focus:border-amber-500 outline-none">
-                  <option value="fixed" ${item.mode === 'fixed' ? 'selected' : ''}>Fixed Price</option>
-                  <option value="per_minute" ${item.mode === 'per_minute' ? 'selected' : ''}>Per Minute</option>
-                  <option value="per_hour" ${item.mode === 'per_hour' ? 'selected' : ''}>Per Hour</option>
-                </select>
+    /* ----------------------------------------------------------
+       TEMPLATE 3: CREATIVE STUDIO (BOLD)
+    ---------------------------------------------------------- */
+    function getCreativeTemplateHTML(t) {
+      return `
+        <div class="flex-1 flex flex-col justify-between font-sans">
+          <div>
+            <!-- Vibrant Header Banner -->
+            <div class="p-8 text-white flex justify-between items-start relative overflow-hidden" style="background-color: ${STATE.accent};">
+              <div class="relative z-10 space-y-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-widest bg-white/20 text-white backdrop-blur-sm">Creative Studio & Code</span>
+                <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="field-input font-black text-3xl text-white tracking-tight leading-tight" placeholder="Name">
+                <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="field-input text-xs font-semibold uppercase tracking-wider text-white/90" placeholder="Title">
+                <div class="flex gap-4 text-[11px] text-white/80 pt-1">
+                  <span>${escapeHtml(STATE.company.email)}</span>
+                  <span>•</span>
+                  <span>${escapeHtml(STATE.company.phone)}</span>
+                </div>
               </div>
 
-              <div>
-                <label class="block text-[11px] text-slate-400 mb-1">Rate (₹)</label>
-                <input type="number" min="0" value="${item.rate}" onchange="updateItemField('${item.id}', 'rate', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-white mono-num focus:border-amber-500 outline-none" />
+              <div class="relative z-10 text-right space-y-2">
+                <div class="inline-block bg-white text-slate-900 px-3 py-1 rounded-lg font-mono font-black text-lg shadow-sm">
+                  ${escapeHtml(STATE.invoice.number)}
+                </div>
+                <div>${getStatusBadgeHTML(true)}</div>
+                <div class="text-[11px] text-white/90 space-y-0.5">
+                  <p>Issued: <input type="date" value="${STATE.invoice.date}" oninput="updateField('invoice.date', this.value)" class="field-input text-white text-right w-24"></p>
+                  <p>Due: <input type="date" value="${STATE.invoice.dueDate}" oninput="updateField('invoice.dueDate', this.value)" class="field-input text-white font-bold text-right w-24"></p>
+                </div>
               </div>
+            </div>
 
+            <!-- Client & Project Info Banner -->
+            <div class="px-8 py-5 bg-slate-100/90 border-b border-slate-200 grid grid-cols-2 gap-6 text-xs">
               <div>
-                ${durationInputsHtml}
+                <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-1">Client Authorization</p>
+                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="field-input font-bold text-slate-900 text-sm">
+                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="field-input text-slate-600 text-[11px]">
+                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="field-input text-slate-500 text-[10px]">
+              </div>
+              <div class="text-right flex flex-col justify-between">
+                <div>
+                  <p class="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mb-1">Production Project</p>
+                  <p class="font-bold text-slate-900 text-xs">4K Video Mastering & Web Deployment</p>
+                  <p class="text-slate-500 text-[11px]">Status: Active Sprint Handover</p>
+                </div>
+                <div class="text-slate-600 text-[11px]">
+                  Direct UPI Pay: <span class="font-mono font-bold text-slate-900">${escapeHtml(STATE.invoice.upiId)}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="px-8 mt-5">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="bg-slate-900 text-white font-bold uppercase text-[9px] tracking-wider rounded-t-lg">
+                    <th class="py-2.5 px-3 rounded-l-lg w-[52%]">Milestone & Deliverable</th>
+                    <th class="py-2.5 px-2 text-right w-[12%]">Qty</th>
+                    <th class="py-2.5 px-2 text-right w-[16%]">Rate (${STATE.currency})</th>
+                    <th class="py-2.5 px-3 text-right w-[16%]">Total (${STATE.currency})</th>
+                    <th class="py-2.5 px-1 text-center rounded-r-lg w-[4%] no-print"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  ${getItemsTableRowsHTML()}
+                </tbody>
+              </table>
+              <div class="mt-2 no-print add-row-container">
+                <button onclick="addNewLineItem()" class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 flex items-center gap-1 transition-colors">
+                  <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add Milestone
+                </button>
               </div>
             </div>
           </div>
 
-          <div class="pt-2 border-t border-slate-800/80 flex justify-between items-center text-xs">
-            <span class="text-slate-400">Total:</span>
-            <span class="font-bold text-amber-400 mono-num">₹${formatINR(itemAmount)}</span>
+          <!-- Bottom Summary & UPI -->
+          <div class="p-8 pt-4 border-t border-slate-200 grid grid-cols-12 gap-6 items-end">
+            <div class="col-span-7 space-y-3">
+              ${getUpiCardHTML()}
+              <div>
+                <p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Terms of Service</p>
+                <textarea oninput="updateField('invoice.terms', this.value)" rows="2" class="field-input text-[10px] text-slate-500 resize-none">${escapeHtml(STATE.invoice.terms)}</textarea>
+              </div>
+            </div>
+            <div class="col-span-5 space-y-1.5 text-xs">
+              ${getTotalsSummaryHTML(t)}
+            </div>
           </div>
+        </div>
+
+        <div class="px-8 py-2.5 text-white flex justify-between items-center text-[10px]" style="background-color: ${STATE.accent};">
+          <span>Praveenkumar • Freelance Media & Web Studio</span>
+          <span>Made for Excellence</span>
+        </div>
+      `;
+    }
+
+    /* ----------------------------------------------------------
+       TEMPLATE 4: CORPORATE / EXECUTIVE
+    ---------------------------------------------------------- */
+    function getCorporateTemplateHTML(t) {
+      return `
+        <div class="p-10 flex-1 flex flex-col justify-between font-serif">
+          <div>
+            <!-- Formal Top Border & Header -->
+            <div class="border-t-4 border-b-2 py-4 mb-4" style="border-color: ${STATE.accent};">
+              <div class="flex justify-between items-center font-sans">
+                <div>
+                  <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="field-input font-cinzel font-bold text-2xl text-slate-900 tracking-wider uppercase">
+                  <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="field-input font-sans text-xs tracking-widest text-slate-600 uppercase">
+                </div>
+                <div class="text-right">
+                  <h2 class="font-cinzel font-bold text-2xl text-slate-900 tracking-wider">TAX INVOICE</h2>
+                  <input type="text" value="${escapeHtml(STATE.invoice.number)}" oninput="updateField('invoice.number', this.value)" class="field-input font-mono font-bold text-slate-700 text-right text-xs">
+                </div>
+              </div>
+            </div>
+
+            <!-- Corporate Info Grid -->
+            <div class="grid grid-cols-2 gap-8 text-xs font-sans pb-4 border-b border-slate-200">
+              <div class="space-y-1">
+                <p class="font-bold text-slate-900 uppercase text-[10px] tracking-wider">Consultant / Service Provider:</p>
+                <p class="font-semibold text-slate-800">${escapeHtml(STATE.company.name)}</p>
+                <p class="text-slate-600">${escapeHtml(STATE.company.email)} • ${escapeHtml(STATE.company.phone)}</p>
+                <p class="text-slate-500">${escapeHtml(STATE.company.location)}</p>
+              </div>
+              <div class="space-y-1 text-right">
+                <p class="font-bold text-slate-900 uppercase text-[10px] tracking-wider">Client Recipient:</p>
+                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="field-input font-semibold text-slate-800 text-right">
+                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="field-input text-slate-600 text-right">
+                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="field-input text-slate-500 text-right">
+                <div class="pt-1 flex justify-end gap-3 text-[11px]">
+                  <span>Date: <strong>${STATE.invoice.date}</strong></span>
+                  <span>Due: <strong>${STATE.invoice.dueDate}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Items Table -->
+            <div class="mt-4 font-sans">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="border-y-2 border-slate-800 text-slate-900 font-bold uppercase text-[10px]">
+                    <th class="py-2.5 px-2 w-[52%]">Services & Deliverables</th>
+                    <th class="py-2.5 px-2 text-right w-[12%]">Units</th>
+                    <th class="py-2.5 px-2 text-right w-[16%]">Unit Price (${STATE.currency})</th>
+                    <th class="py-2.5 px-2 text-right w-[16%]">Amount (${STATE.currency})</th>
+                    <th class="py-2.5 px-1 text-center w-[4%] no-print"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  ${getItemsTableRowsHTML()}
+                </tbody>
+              </table>
+              <div class="mt-2 no-print add-row-container">
+                <button onclick="addNewLineItem()" class="text-xs font-semibold px-2 py-1 text-slate-700 hover:text-slate-900 flex items-center gap-1 border border-slate-300 rounded">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Line Item
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Executive Totals & UPI -->
+          <div class="pt-4 border-t-2 border-slate-800 grid grid-cols-12 gap-6 items-end font-sans">
+            <div class="col-span-6 space-y-3">
+              ${getUpiCardHTML()}
+              <div>
+                <p class="text-[9px] font-bold uppercase text-slate-500">Authorized Settlement Terms</p>
+                <textarea oninput="updateField('invoice.terms', this.value)" rows="2" class="field-input text-[10px] text-slate-600 resize-none">${escapeHtml(STATE.invoice.terms)}</textarea>
+              </div>
+            </div>
+            <div class="col-span-6 space-y-1.5 text-xs">
+              ${getTotalsSummaryHTML(t)}
+              <div class="pt-4 flex justify-between items-end border-t border-slate-300">
+                <div class="text-left">
+                  <div class="w-36 border-b border-slate-400 mb-1"></div>
+                  <p class="text-[9px] uppercase tracking-wider text-slate-500">Authorized Signature</p>
+                </div>
+                <div>${getStatusBadgeHTML()}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-10 py-3 bg-slate-100 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 font-sans">
+          <span>Official Invoice • Praveenkumar Consulting</span>
+          <span>Payment Reference: ${escapeHtml(STATE.invoice.upiId)}</span>
+        </div>
+      `;
+    }
+
+    /* ----------------------------------------------------------
+       TEMPLATE 5: SPLIT SIDEBAR (DARK ACCENT COLUMN)
+    ---------------------------------------------------------- */
+    function getSplitSidebarTemplateHTML(t) {
+      return `
+        <div class="flex-1 flex flex-row h-full">
+          <!-- LEFT DARK ACCENT COLUMN -->
+          <div class="w-[32%] p-6 text-white flex flex-col justify-between relative" style="background-color: ${STATE.accent};">
+            <div class="space-y-6">
+              <!-- Avatar & Brand -->
+              <div>
+                <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold text-xl mb-3 shadow">
+                  PK
+                </div>
+                <input type="text" value="${escapeHtml(STATE.company.name)}" oninput="updateField('company.name', this.value)" class="dark-field-input font-bold text-xl tracking-tight leading-none" placeholder="Your Name">
+                <input type="text" value="${escapeHtml(STATE.company.title)}" oninput="updateField('company.title', this.value)" class="dark-field-input text-xs text-white/80 font-medium uppercase tracking-wider mt-1" placeholder="Title">
+              </div>
+
+              <!-- From Details -->
+              <div class="text-[11px] text-white/80 space-y-2 pt-2 border-t border-white/20">
+                <p class="text-[9px] uppercase tracking-widest font-bold text-white/60">Contact Info</p>
+                <div class="space-y-1">
+                  <input type="text" value="${escapeHtml(STATE.company.email)}" oninput="updateField('company.email', this.value)" class="dark-field-input text-[11px]">
+                  <input type="text" value="${escapeHtml(STATE.company.phone)}" oninput="updateField('company.phone', this.value)" class="dark-field-input text-[11px]">
+                  <input type="text" value="${escapeHtml(STATE.company.location)}" oninput="updateField('company.location', this.value)" class="dark-field-input text-[11px]">
+                </div>
+              </div>
+
+              <!-- Client Details -->
+              <div class="text-[11px] text-white/80 space-y-1 pt-2 border-t border-white/20">
+                <p class="text-[9px] uppercase tracking-widest font-bold text-white/60">Billed To</p>
+                <input type="text" value="${escapeHtml(STATE.client.name)}" oninput="updateField('client.name', this.value)" class="dark-field-input font-bold text-white text-xs">
+                <input type="text" value="${escapeHtml(STATE.client.company)}" oninput="updateField('client.company', this.value)" class="dark-field-input text-[11px]">
+                <input type="text" value="${escapeHtml(STATE.client.address)}" oninput="updateField('client.address', this.value)" class="dark-field-input text-[10px]">
+              </div>
+
+              <!-- UPI Scan Box Inside Column -->
+              <div class="pt-2 border-t border-white/20">
+                <p class="text-[9px] uppercase tracking-widest font-bold text-white/60 mb-2">Scan & Pay (UPI)</p>
+                <div class="bg-white p-2.5 rounded-xl shadow-md inline-block">
+                  <div id="qrcode" class="w-[84px] h-[84px]"></div>
+                </div>
+                <div class="mt-2 text-[10px] space-y-0.5">
+                  <p class="font-mono font-bold text-white select-all">${escapeHtml(STATE.invoice.upiId)}</p>
+                  <p class="text-white/70">Praveenkumar</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Column Footer -->
+            <div class="pt-4 border-t border-white/20 text-[9px] text-white/60">
+              Tax Invoice Document • 2026
+            </div>
+          </div>
+
+          <!-- RIGHT MAIN CONTENT COLUMN -->
+          <div class="w-[68%] p-8 flex flex-col justify-between bg-white">
+            <div>
+              <!-- Invoice Top Meta -->
+              <div class="flex justify-between items-start pb-4 border-b border-slate-200">
+                <div>
+                  <h2 class="font-extrabold text-2xl text-slate-900 tracking-tight">INVOICE</h2>
+                  <div class="mt-1">${getStatusBadgeHTML()}</div>
+                </div>
+                <div class="text-right text-xs space-y-1">
+                  <div><span class="text-slate-400">Invoice No:</span> <input type="text" value="${escapeHtml(STATE.invoice.number)}" oninput="updateField('invoice.number', this.value)" class="field-input font-mono font-bold text-slate-800 text-right w-28"></div>
+                  <div><span class="text-slate-400">Date:</span> <input type="date" value="${STATE.invoice.date}" oninput="updateField('invoice.date', this.value)" class="field-input text-slate-700 text-right w-28"></div>
+                  <div><span class="text-slate-400">Due Date:</span> <input type="date" value="${STATE.invoice.dueDate}" oninput="updateField('invoice.dueDate', this.value)" class="field-input font-bold text-slate-900 text-right w-28"></div>
+                </div>
+              </div>
+
+              <!-- Items Table -->
+              <div class="mt-4">
+                <table class="w-full text-left text-xs">
+                  <thead>
+                    <tr class="border-b-2 border-slate-200 text-slate-800 font-bold uppercase text-[9px]">
+                      <th class="py-2.5 px-2 w-[48%]">Description</th>
+                      <th class="py-2.5 px-2 text-right w-[12%]">Qty</th>
+                      <th class="py-2.5 px-2 text-right w-[18%]">Rate (${STATE.currency})</th>
+                      <th class="py-2.5 px-2 text-right w-[18%]">Total (${STATE.currency})</th>
+                      <th class="py-2.5 px-1 text-center w-[4%] no-print"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    ${getItemsTableRowsHTML()}
+                  </tbody>
+                </table>
+                <div class="mt-2 no-print add-row-container">
+                  <button onclick="addNewLineItem()" class="text-xs font-semibold px-2 py-1 text-indigo-600 hover:bg-indigo-50 rounded flex items-center gap-1">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add item
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column Financial Summary -->
+            <div class="pt-4 border-t border-slate-200 space-y-3">
+              <div class="space-y-1.5 text-xs">
+                ${getTotalsSummaryHTML(t)}
+              </div>
+              <div class="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex justify-between items-center">
+                <span>Terms: Net 10 Days</span>
+                <span>Thank you for your business!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ==========================================================
+       SUB-COMPONENTS (TABLE ROWS, TOTALS, UPI, BADGES)
+    ========================================================== */
+    function getItemsTableRowsHTML() {
+      return STATE.items.map((item, index) => {
+        const rowTotal = Number(item.qty || 0) * Number(item.rate || 0);
+        return `
+          <tr class="group hover:bg-slate-50/60 transition-colors">
+            <td class="py-2 px-2 align-top">
+              <input type="text" value="${escapeHtml(item.name)}" oninput="updateItem(${index}, 'name', this.value)" class="field-input font-semibold text-slate-800 text-xs mb-0.5" placeholder="Item name">
+              <input type="text" value="${escapeHtml(item.desc || '')}" oninput="updateItem(${index}, 'desc', this.value)" class="field-input text-slate-500 text-[10px]" placeholder="Detailed description">
+            </td>
+            <td class="py-2 px-2 text-right align-top">
+              <input type="number" min="1" step="any" value="${item.qty}" oninput="updateItem(${index}, 'qty', parseFloat(this.value) || 0)" class="field-input text-right w-12 font-medium text-slate-700">
+            </td>
+            <td class="py-2 px-2 text-right align-top">
+              <input type="number" min="0" step="any" value="${item.rate}" oninput="updateItem(${index}, 'rate', parseFloat(this.value) || 0)" class="field-input text-right w-20 font-medium text-slate-700">
+            </td>
+            <td class="py-2 px-2 text-right align-top font-bold text-slate-900">
+              ${formatMoney(rowTotal)}
+            </td>
+            <td class="py-2 px-1 text-center align-top no-print">
+              <button onclick="removeLineItem(${index})" title="Remove item" class="text-slate-300 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </td>
+          </tr>
         `;
-
-        container.appendChild(card);
-      });
+      }).join('');
     }
 
-    // 1-Click Add Custom Service
-    window.addNewCustomItem = function() {
-      const uniqueId = 'srv-' + Math.random().toString(36).substring(2, 9);
-      state.items.push({
-        id: uniqueId,
-        title: 'Custom Post-Production Service',
-        desc: 'Revisions, audio cleanup, visual effects & color grading',
-        mode: 'fixed',
-        rate: 1000,
-        hours: 0,
-        minutes: 0,
-        qty: 1
-      });
-      renderItemsEditor();
-      renderInvoice();
-    };
-
-    // Add Service from Preset Catalog
-    window.addCatalogPreset = function(name, rate, mode, hours, minutes, qty, desc) {
-      const uniqueId = 'srv-' + Math.random().toString(36).substring(2, 9);
-      state.items.push({
-        id: uniqueId,
-        title: name,
-        desc: desc || '',
-        mode: mode,
-        rate: rate,
-        hours: hours || 0,
-        minutes: minutes || 0,
-        qty: qty || 1
-      });
-      renderItemsEditor();
-      renderInvoice();
-    };
-
-    // Delete Service Line Item
-    window.deleteServiceItem = function(id) {
-      if (state.items.length <= 1) {
-        if (!confirm("This is the last line item. Clear it to blank?")) return;
-        state.items = [{
-          id: 'srv-' + Math.random().toString(36).substring(2, 9),
-          title: 'Video Editing Service',
-          desc: '',
-          mode: 'fixed',
-          rate: 0,
-          hours: 0,
-          minutes: 0,
-          qty: 1
-        }];
-      } else {
-        state.items = state.items.filter(item => item.id !== id);
-      }
-      renderItemsEditor();
-      renderInvoice();
-    };
-
-    // Update single field
-    window.updateItemField = function(id, field, value) {
-      const item = state.items.find(i => i.id === id);
-      if (item) {
-        if (['rate', 'hours', 'minutes', 'qty'].includes(field)) {
-          item[field] = parseFloat(value) || 0;
-        } else {
-          item[field] = value;
-        }
-        renderItemsEditor();
-        renderInvoice();
-      }
-    };
-
-    window.updateMinutesTotal = function(id, val) {
-      const item = state.items.find(i => i.id === id);
-      if (item) {
-        const total = parseInt(val) || 0;
-        item.hours = Math.floor(total / 60);
-        item.minutes = total % 60;
-        renderItemsEditor();
-        renderInvoice();
-      }
-    };
-
-    // GST Toggling & Selection
-    window.toggleGst = function(enabled) {
-      state.gstEnabled = enabled;
-      const gstBody = document.getElementById('gstConfigBody');
-      if (enabled) {
-        gstBody.classList.remove('opacity-40', 'pointer-events-none');
-      } else {
-        gstBody.classList.add('opacity-40', 'pointer-events-none');
-      }
-      renderInvoice();
-    };
-
-    window.handleGstRateChange = function() {
-      const val = document.getElementById('gstRateSelect').value;
-      const customBlock = document.getElementById('customGstBlock');
-      if (val === 'custom') {
-        customBlock.classList.remove('hidden');
-        state.gstRate = parseFloat(document.getElementById('customGstInput').value) || 0;
-      } else {
-        customBlock.classList.add('hidden');
-        state.gstRate = parseFloat(val);
-      }
-      renderInvoice();
-    };
-
-    document.getElementById('customGstInput')?.addEventListener('input', function() {
-      state.gstRate = parseFloat(this.value) || 0;
-      renderInvoice();
-    });
-
-    window.regenerateInvNumber = function() {
-      const rand = Math.floor(1000 + Math.random() * 9000);
-      document.getElementById('invoiceNumber').value = `INV-2026-${rand}`;
-      renderInvoice();
-    };
-
-    // Format readable dates
-    function formatDisplayDate(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    function getTotalsSummaryHTML(t) {
+      return `
+        <div class="flex justify-between py-0.5 text-slate-600">
+          <span>Subtotal:</span>
+          <span class="font-medium text-slate-800 font-mono">${STATE.currency}${formatMoney(t.subtotal)}</span>
+        </div>
+        ${t.discountVal > 0 ? `
+          <div class="flex justify-between py-0.5 text-slate-600">
+            <span>Discount (${STATE.invoice.discount}${STATE.invoice.discountType === '%' ? '%' : ' flat'}):</span>
+            <span class="font-medium text-rose-600 font-mono">-${STATE.currency}${formatMoney(t.discountVal)}</span>
+          </div>
+        ` : ''}
+        <div class="flex justify-between py-0.5 text-slate-600">
+          <span>Tax / GST (${STATE.invoice.taxRate}%):</span>
+          <span class="font-medium text-slate-800 font-mono">${STATE.currency}${formatMoney(t.taxAmount)}</span>
+        </div>
+        <div class="flex justify-between py-1 border-t border-slate-200 text-slate-900 font-bold">
+          <span>Grand Total:</span>
+          <span class="font-mono text-sm">${STATE.currency}${formatMoney(t.grandTotal)}</span>
+        </div>
+        ${Number(STATE.invoice.paidAmount) > 0 ? `
+          <div class="flex justify-between py-0.5 text-emerald-700 text-[11px]">
+            <span>Paid to Date:</span>
+            <span class="font-mono font-medium">-${STATE.currency}${formatMoney(STATE.invoice.paidAmount)}</span>
+          </div>
+        ` : ''}
+        <div class="p-2.5 rounded-lg text-white font-bold flex justify-between items-center shadow-sm" style="background-color: ${STATE.accent};">
+          <span class="text-[10px] uppercase tracking-wider">Balance Due:</span>
+          <span class="text-base font-extrabold font-mono">${STATE.currency}${formatMoney(t.balanceDue)}</span>
+        </div>
+      `;
     }
 
-    // Dynamic QR Generator
-    function generateInvoiceQR(totalPayable) {
-      const container = document.getElementById('qrcodeCanvasContainer');
-      container.innerHTML = '';
-      const upi = document.getElementById('upiIdInput').value.trim() || 'editor@oksbi';
-      const payee = document.getElementById('payeeName').value.trim() || document.getElementById('editorName').value.trim() || 'Video Editor';
-      const amount = Math.round(totalPayable);
+    function getUpiCardHTML(minimal = false) {
+      return `
+        <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center gap-3">
+          <div class="bg-white p-1.5 rounded-lg border border-slate-200 flex-shrink-0 shadow-sm">
+            <div id="qrcode" class="w-[80px] h-[80px]"></div>
+          </div>
+          <div class="space-y-1 text-xs">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-emerald-600 text-white tracking-wider">UPI Instant Pay</span>
+              <button onclick="copyUpiId()" title="Copy UPI ID" class="text-slate-400 hover:text-slate-700 no-print"><i data-lucide="copy" class="w-3 h-3"></i></button>
+            </div>
+            <p class="text-[10px] text-slate-500">Scan via GPay, PhonePe, Paytm, or BHIM.</p>
+            <p class="text-[10px] font-mono font-bold text-slate-900 bg-slate-200/60 px-1.5 py-0.5 rounded select-all inline-block">${escapeHtml(STATE.invoice.upiId)}</p>
+            <p class="text-[9px] text-slate-400">Payee: <strong class="text-slate-700">${escapeHtml(STATE.invoice.payeeName)}</strong></p>
+          </div>
+        </div>
+      `;
+    }
 
-      const upiUrl = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(payee)}&am=${amount}&cu=INR&tn=${encodeURIComponent('Invoice Payment')}`;
+    function getStatusBadgeHTML(lightMode = false) {
+      const s = STATE.status;
+      let colors = 'bg-amber-100 text-amber-800 border-amber-300';
+      if (s === 'PAID') colors = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+      if (s === 'OVERDUE') colors = 'bg-rose-100 text-rose-800 border-rose-300';
+      if (s === 'DRAFT') colors = 'bg-slate-100 text-slate-700 border-slate-300';
 
-      try {
+      if (lightMode) {
+        colors = 'bg-white/20 text-white border-white/30 backdrop-blur-sm';
+      }
+
+      return `<span class="px-2 py-0.5 rounded text-[9px] font-extrabold tracking-widest uppercase border ${colors}">${s}</span>`;
+    }
+
+    /* ==========================================================
+       QR CODE GENERATION
+    ========================================================== */
+    function generateUpiQrCode(amount) {
+      const qrContainers = document.querySelectorAll('#qrcode');
+      if (!qrContainers.length) return;
+
+      const upiId = STATE.invoice.upiId || '8667536739-2@ybl';
+      const payeeName = STATE.invoice.payeeName || 'Praveenkumar';
+      const safeAmount = (Number(amount) > 0 ? Number(amount) : 0).toFixed(2);
+      const invoiceNo = STATE.invoice.number || 'INV';
+
+      // Standard UPI Intent Link
+      const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${safeAmount}&cu=INR&tn=${encodeURIComponent('Invoice ' + invoiceNo + ' Settlement')}`;
+
+      qrContainers.forEach(container => {
+        container.innerHTML = '';
         new QRCode(container, {
-          text: upiUrl,
-          width: 90,
-          height: 90,
-          colorDark: "#020617",
-          colorLight: "#ffffff",
+          text: upiUri,
+          width: 80,
+          height: 80,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff',
           correctLevel: QRCode.CorrectLevel.M
         });
+      });
+    }
+
+    /* ==========================================================
+       USER INTERACTION HANDLERS
+    ========================================================= */
+    function switchTemplate(tplKey) {
+      STATE.template = tplKey;
+      document.querySelectorAll('.tpl-btn').forEach(btn => {
+        btn.className = 'tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white';
+      });
+      const activeBtn = document.getElementById(`tplBtn-${tplKey}`);
+      if (activeBtn) {
+        activeBtn.className = 'tpl-btn px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm';
+      }
+      renderInvoice();
+      showToast(`Switched to ${tplKey.toUpperCase()} template`);
+    }
+
+    function buildThemePalette() {
+      const palette = document.getElementById('themePalette');
+      palette.innerHTML = '';
+      THEME_PRESETS.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `w-5 h-5 rounded-full border-2 transition-transform hover:scale-110 ${STATE.accent === item.color ? 'border-white scale-110' : 'border-transparent'}`;
+        btn.style.backgroundColor = item.color;
+        btn.title = item.name;
+        btn.onclick = () => {
+          STATE.accent = item.color;
+          document.documentElement.style.setProperty('--accent', item.color);
+          buildThemePalette();
+          renderInvoice();
+          showToast(`Theme: ${item.name}`);
+        };
+        palette.appendChild(btn);
+      });
+    }
+
+    function setCurrency(sym) {
+      STATE.currency = sym;
+      document.querySelectorAll('.curr-selector-btn').forEach(b => {
+        if (b.getAttribute('data-curr') === sym) {
+          b.className = 'curr-selector-btn py-1.5 rounded border border-indigo-500 bg-indigo-500/20 text-indigo-300 font-bold';
+        } else {
+          b.className = 'curr-selector-btn py-1.5 rounded border border-slate-700 hover:bg-slate-700 text-slate-300';
+        }
+      });
+      document.getElementById('sidebarCurrencySymbol').textContent = `${sym} Format`;
+      document.getElementById('paidSymbolPrefix').textContent = sym;
+      renderInvoice();
+      showToast(`Currency set to ${sym}`);
+    }
+
+    function setStatus(statusKey) {
+      STATE.status = statusKey;
+      document.querySelectorAll('.status-btn').forEach(btn => {
+        btn.className = 'status-btn py-1 rounded border border-slate-700 hover:bg-slate-700 text-slate-300';
+      });
+      const active = document.getElementById(`status-${statusKey.toLowerCase()}`);
+      if (active) {
+        active.className = `status-btn py-1 rounded border font-bold ${
+          statusKey === 'PAID' ? 'border-emerald-500 bg-emerald-500/20 text-emerald-300' :
+          statusKey === 'PENDING' ? 'border-amber-500 bg-amber-500/20 text-amber-300' :
+          statusKey === 'OVERDUE' ? 'border-rose-500 bg-rose-500/20 text-rose-300' :
+          'border-slate-500 bg-slate-500/20 text-slate-300'
+        }`;
+      }
+      renderInvoice();
+      showToast(`Status: ${statusKey}`);
+    }
+
+    function setQuickGST(val) {
+      document.getElementById('ctrlTaxRate').value = val;
+      STATE.invoice.taxRate = val;
+      renderInvoice();
+      showToast(`Tax rate updated to ${val}% GST`);
+    }
+
+    function addNewLineItem() {
+      STATE.items.push({
+        id: Date.now(),
+        name: 'New Video / Web Milestone Deliverable',
+        desc: 'Scope handover, post-production revision cycle, and client sign-off.',
+        qty: 1,
+        rate: 5000
+      });
+      renderInvoice();
+      showToast('Line item added');
+    }
+
+    function removeLineItem(index) {
+      if (STATE.items.length <= 1) {
+        showToast('At least 1 line item is required');
+        return;
+      }
+      STATE.items.splice(index, 1);
+      renderInvoice();
+      showToast('Line item deleted');
+    }
+
+    function updateItem(index, key, val) {
+      if (STATE.items[index]) {
+        STATE.items[index][key] = val;
+        // Re-render totals without losing keyboard focus
+        silentTotalsRefresh();
+      }
+    }
+
+    function updateField(path, value) {
+      const parts = path.split('.');
+      if (parts.length === 2) {
+        STATE[parts[0]][parts[1]] = value;
+      }
+      silentTotalsRefresh();
+    }
+
+    function syncStateFromInputs() {
+      STATE.invoice.taxRate = parseFloat(document.getElementById('ctrlTaxRate').value) || 0;
+      STATE.invoice.discount = parseFloat(document.getElementById('ctrlDiscount').value) || 0;
+      STATE.invoice.discountType = document.getElementById('ctrlDiscountType').value;
+      STATE.invoice.paidAmount = parseFloat(document.getElementById('ctrlPaidAmount').value) || 0;
+      STATE.invoice.upiId = document.getElementById('ctrlUpiId').value.trim();
+      STATE.invoice.payeeName = document.getElementById('ctrlPayeeName').value.trim();
+      renderInvoice();
+    }
+
+    function updateSidebarInputs() {
+      document.getElementById('ctrlTaxRate').value = STATE.invoice.taxRate;
+      document.getElementById('ctrlDiscount').value = STATE.invoice.discount;
+      document.getElementById('ctrlDiscountType').value = STATE.invoice.discountType;
+      document.getElementById('ctrlPaidAmount').value = STATE.invoice.paidAmount;
+      document.getElementById('ctrlUpiId').value = STATE.invoice.upiId;
+      document.getElementById('ctrlPayeeName').value = STATE.invoice.payeeName;
+    }
+
+    function silentTotalsRefresh() {
+      const totals = calculateTotals();
+      generateUpiQrCode(totals.balanceDue > 0 ? totals.balanceDue : totals.grandTotal);
+    }
+
+    /* ==========================================================
+       ZOOM & PRINT
+    ========================================================== */
+    function adjustZoom(delta) {
+      STATE.zoom = Math.min(1.2, Math.max(0.4, Math.round((STATE.zoom + delta) * 100) / 100));
+      applyZoom();
+    }
+
+    function resetZoom() {
+      STATE.zoom = 0.85;
+      applyZoom();
+    }
+
+    function applyZoom() {
+      const scaler = document.getElementById('canvasScaler');
+      const text = document.getElementById('zoomLevelText');
+      if (scaler) scaler.style.transform = `scale(${STATE.zoom})`;
+      if (text) text.textContent = `${Math.round(STATE.zoom * 100)}%`;
+    }
+
+    function triggerPrintPDF() {
+      window.print();
+    }
+
+    function copyUpiId() {
+      const upi = STATE.invoice.upiId || '8667536739-2@ybl';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(upi);
+      } else {
+        const temp = document.createElement('textarea');
+        temp.value = upi;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+      }
+      showToast(`Copied UPI ID: ${upi}`);
+    }
+
+    /* ==========================================================
+       LOCALSTORAGE PERSISTENCE
+    ========================================================== */
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem('pk_invoice_state', JSON.stringify(STATE));
+        showToast('Saved state to browser storage!');
       } catch (e) {
-        console.error("QR Code Error:", e);
+        showToast('Could not save to storage');
       }
     }
 
-    // Master Invoice Synchronizer
-    function renderInvoice() {
-      // 1. Synchronize Editor Details
-      document.getElementById('invEditorName').textContent = document.getElementById('editorName').value || 'Video Editor';
-      document.getElementById('invEditorEmail').textContent = document.getElementById('editorEmail').value || '';
-      document.getElementById('invEditorPhone').textContent = document.getElementById('editorPhone').value || '';
-
-      const editorGstinVal = document.getElementById('editorGstinInput').value.trim();
-      const editorGstinRow = document.getElementById('invEditorGstinRow');
-      if (editorGstinVal) {
-        document.getElementById('invEditorGstin').textContent = editorGstinVal;
-        editorGstinRow.style.display = 'block';
-      } else {
-        editorGstinRow.style.display = 'none';
-      }
-
-      // 2. Synchronize Client Details
-      document.getElementById('invClientName').textContent = document.getElementById('clientName').value || 'Client Name';
-      document.getElementById('invProjectTitle').textContent = document.getElementById('projectTitle').value || 'Video Project';
-      document.getElementById('invClientEmail').textContent = document.getElementById('clientEmail').value || '';
-      document.getElementById('invClientPhone').textContent = document.getElementById('clientPhone').value || '';
-
-      const clientGstinVal = document.getElementById('clientGstinInput').value.trim();
-      const clientGstinRow = document.getElementById('invClientGstinRow');
-      if (clientGstinVal) {
-        document.getElementById('invClientGstin').textContent = clientGstinVal;
-        clientGstinRow.style.display = 'block';
-      } else {
-        clientGstinRow.style.display = 'none';
-      }
-
-      // 3. Meta Dates & Numbers
-      document.getElementById('invNumberDisplay').textContent = document.getElementById('invoiceNumber').value || 'INV-001';
-      document.getElementById('invSacCode').textContent = document.getElementById('sacCodeInput').value || '998311';
-      document.getElementById('invDateDisplay').textContent = formatDisplayDate(document.getElementById('invoiceDate').value);
-      document.getElementById('invDueDateDisplay').textContent = formatDisplayDate(document.getElementById('dueDate').value);
-
-      // 4. Render Table Rows
-      const tbody = document.getElementById('invoiceTableBody');
-      tbody.innerHTML = '';
-      let subtotal = 0;
-
-      state.items.forEach(item => {
-        const lineTotal = calculateItemAmount(item);
-        subtotal += lineTotal;
-
-        let qtyText = '';
-        let rateText = '';
-
-        if (item.mode === 'per_hour') {
-          qtyText = `${item.hours}h ${item.minutes}m`;
-          rateText = `₹${formatINR(item.rate)} / hr`;
-        } else if (item.mode === 'per_minute') {
-          const totalMin = (item.hours * 60) + item.minutes;
-          qtyText = `${totalMin} min(s)`;
-          rateText = `₹${formatINR(item.rate)} / min`;
-        } else {
-          qtyText = `${item.qty} Item(s)`;
-          rateText = `₹${formatINR(item.rate)}`;
+    function loadFromLocalStorage() {
+      try {
+        const saved = localStorage.getItem('pk_invoice_state');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          Object.assign(STATE, parsed);
         }
-
-        const tr = document.createElement('tr');
-        tr.className = 'border-b border-slate-100';
-        tr.innerHTML = `
-          <td class="py-3 px-2 align-top">
-            <div class="font-bold text-slate-900 text-xs">${item.title}</div>
-            ${item.desc ? `<div class="text-[11px] text-slate-500 mt-0.5 leading-snug">\${item.desc}</div>` : ''}
-          </td>
-          <td class="py-3 px-2 text-center align-top font-medium text-slate-700 mono-num">${qtyText}</td>
-          <td class="py-3 px-2 text-right align-top font-medium text-slate-700 mono-num">${rateText}</td>
-          <td class="py-3 px-2 text-right align-top font-bold text-slate-950 mono-num">₹${formatINR(lineTotal)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      // 5. Calculate GST & Totals
-      document.getElementById('invSubtotalDisplay').textContent = `₹${formatINR(subtotal)}`;
-      const gstSplitContainer = document.getElementById('gstSplitContainer');
-      gstSplitContainer.innerHTML = '';
-
-      let taxAmount = 0;
-      if (state.gstEnabled && state.gstRate > 0) {
-        taxAmount = (subtotal * state.gstRate) / 100;
-        const gstType = document.getElementById('gstTypeSelect').value;
-
-        if (gstType === 'intra') {
-          const halfRate = (state.gstRate / 2).toFixed(1).replace('.0', '');
-          const halfTax = taxAmount / 2;
-          gstSplitContainer.innerHTML = `
-            <div class="flex justify-between text-slate-600 text-[11px]">
-              <span>CGST (${halfRate}%):</span>
-              <span class="mono-num">₹${formatINR(halfTax)}</span>
-            </div>
-            <div class="flex justify-between text-slate-600 text-[11px]">
-              <span>SGST (${halfRate}%):</span>
-              <span class="mono-num">₹${formatINR(halfTax)}</span>
-            </div>
-          `;
-        } else {
-          gstSplitContainer.innerHTML = `
-            <div class="flex justify-between text-slate-600 text-[11px]">
-              <span>IGST (${state.gstRate}%):</span>
-              <span class="mono-num">₹${formatINR(taxAmount)}</span>
-            </div>
-          `;
-        }
-      } else {
-        gstSplitContainer.innerHTML = `
-          <div class="flex justify-between text-slate-400 text-[11px]">
-            <span>GST:</span>
-            <span class="mono-num">₹0.00 (Exempt)</span>
-          </div>
-        `;
-      }
-
-      const grandTotal = subtotal + taxAmount;
-      state.lastGrandTotal = grandTotal;
-      document.getElementById('invTotalDueDisplay').textContent = `₹${formatINR(grandTotal)}`;
-
-      // 6. Update UPI Section & Trigger Dynamic QR Code
-      const currentUpi = document.getElementById('upiIdInput').value.trim() || 'editor@oksbi';
-      document.getElementById('invUpiIdDisplay').textContent = currentUpi;
-      generateInvoiceQR(grandTotal);
+      } catch (e) {}
     }
 
-    // Attach Input Event Listeners
-    [
-      'editorName', 'payeeName', 'editorEmail', 'editorPhone', 'editorGstinInput',
-      'clientName', 'projectTitle', 'clientEmail', 'clientPhone', 'clientGstinInput',
-      'invoiceNumber', 'invoiceDate', 'dueDate', 'sacCodeInput', 'upiIdInput'
-    ].forEach(id => {
-      document.getElementById(id).addEventListener('input', renderInvoice);
-    });
-
-    // Helper: Formatted Summary Message for Copy & WhatsApp
-    function buildSummaryMessage() {
-      const client = document.getElementById('clientName').value;
-      const project = document.getElementById('projectTitle').value;
-      const editor = document.getElementById('editorName').value;
-      const invNum = document.getElementById('invoiceNumber').value;
-      const dueDate = formatDisplayDate(document.getElementById('dueDate').value);
-      const total = document.getElementById('invTotalDueDisplay').textContent;
-      const upi = document.getElementById('upiIdInput').value;
-
-      let itemsSummary = '';
-      state.items.forEach((item, idx) => {
-        const amt = calculateItemAmount(item);
-        itemsSummary += `${idx + 1}. *${item.title}* — ₹${formatINR(amt)}\n`;
-      });
-
-      return `Hi ${client},
-
-Here is the invoice breakdown for *${project}* (Invoice: #${invNum}):
-
-${itemsSummary}
-*Grand Total Payable: ${total}*
-*Payment Due By: ${dueDate}*
-*Pay via UPI ID: ${upi}*
-
-Please confirm once the transfer is initiated.
-
-Best regards,
-${editor}`;
+    function resetDefaults() {
+      localStorage.removeItem('pk_invoice_state');
+      location.reload();
     }
 
-    // 1. Copy Quote to Clipboard
-    document.getElementById('copyQuoteBtn').addEventListener('click', function() {
-      const message = buildSummaryMessage();
-      navigator.clipboard.writeText(message).then(() => {
-        const textSpan = document.getElementById('copyBtnText');
-        textSpan.textContent = '✓ Copied!';
-        setTimeout(() => { textSpan.textContent = 'Copy Summary'; }, 2000);
-      });
-    });
+    function showToast(msg) {
+      const toast = document.getElementById('toastMessage');
+      const text = document.getElementById('toastText');
+      text.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
 
-    // 2. Share directly to WhatsApp
-    document.getElementById('whatsappShareBtn').addEventListener('click', function() {
-      const message = buildSummaryMessage();
-      const phone = document.getElementById('clientPhone').value.replace(/[^0-9]/g, '');
-      const url = phone 
-        ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
-        : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank');
-    });
-
-    // 3. Exact 1-Click PDF Download (html2pdf.js)
-    window.downloadPDFInvoice = function() {
-      const element = document.getElementById('invoiceSheet');
-      const invNumber = document.getElementById('invoiceNumber').value || 'invoice';
-      const clientName = document.getElementById('clientName').value.replace(/[^a-zA-Z0-9]/g, '_') || 'client';
-      const filename = `${invNumber}_${clientName}.pdf`;
-
-      const downloadBtnText = document.getElementById('downloadBtnText');
-      downloadBtnText.textContent = 'Generating...';
-
-      const opt = {
-        margin: [10, 10, 10, 10], // top, left, bottom, right in mm
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      html2pdf().set(opt).from(element).save().then(() => {
-        downloadBtnText.textContent = 'Download PDF';
-      }).catch((err) => {
-        console.error('PDF Generation Error:', err);
-        downloadBtnText.textContent = 'Download PDF';
-      });
-    };
-
-    // Initial Execution
-    renderItemsEditor();
-    renderInvoice();
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
   </script>
 </body>
 </html>
